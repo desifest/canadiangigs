@@ -1,6 +1,8 @@
-
+.idea
 wp-content/upgrade/*
 wp-content/backup-db/*
 wp-content/cache/*
 wp-content/cache/supercache/*
 wp-content/w3tc-cache/*
+
+wp-config.php
