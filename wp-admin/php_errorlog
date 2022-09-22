@@ -1,0 +1,172 @@
+[20-Jul-2022 12:58:05 UTC] WordPress database error Column 'object_id' cannot be null for query INSERT INTO `buf_sgs_log_events` (`visitor_id`, `ts`, `activity`, `description`, `ip`, `hostname`, `code`, `object_id`, `type`, `action`, `visitor_type`) VALUES (5, 1658321885, 'Installed Theme', 'Installed Theme - ', '103.244.174.43', '103.244.174.43', 200, NULL, 'theme', 'install', 'user') made by Theme_Upgrader->install, WP_Upgrader->run, do_action('upgrader_process_complete'), WP_Hook->do_action, WP_Hook->apply_filters, SG_Security\Activity_Log\Activity_Log_Themes->log_theme_install, SG_Security\Activity_Log\Activity_Log_Helper->log_event, SG_Security\Activity_Log\Activity_Log_Helper->insert
+[20-Jul-2022 13:05:49 UTC] PHP Warning:  sprintf(): Too few arguments in /home/customer/www/canadianmusicgigs.com/public_html/wp-admin/includes/class-bulk-upgrader-skin.php on line 156
+[20-Jul-2022 13:07:15 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:07:16 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:07:17 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:07:17 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:07:17 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:07:17 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:07:17 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:07:17 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:07:17 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one second.
+[20-Jul-2022 13:12:26 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:12:26' )
+	AND `key` = 'activation_redirect'
+/* 1 = 1 */ made by do_action('wp_ajax_ocdi_install_plugin'), WP_Hook->do_action, WP_Hook->apply_filters, OCDI\PluginInstaller->install_plugin_callback, OCDI\PluginInstaller->activate_plugin, activate_plugin, do_action('activate_all-in-one-seo-pack/all_in_one_seo_pack.php'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->activate, AIOSEO\Plugin\Common\Utils\Cache->clear, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:26 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query TRUNCATE TABLE buf_aioseo_cache
+/* 1 = 1 */ made by do_action('wp_ajax_ocdi_install_plugin'), WP_Hook->do_action, WP_Hook->apply_filters, OCDI\PluginInstaller->install_plugin_callback, OCDI\PluginInstaller->activate_plugin, activate_plugin, do_action('activate_all-in-one-seo-pack/all_in_one_seo_pack.php'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->activate, AIOSEO\Plugin\Common\Utils\Cache->clear, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:26 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'activation_redirect', `value` = 'b:1;', `expiration` = '2022-07-20 13:12:56', `created` = '2022-07-20 13:12:26', `updated` = '2022-07-20 13:12:26'
+ON DUPLICATE KEY UPDATE `value` = 'b:1;', `expiration` = '2022-07-20 13:12:56', `updated` = '2022-07-20 13:12:26'
+/* 1 = 1 */ made by do_action('wp_ajax_ocdi_install_plugin'), WP_Hook->do_action, WP_Hook->apply_filters, OCDI\PluginInstaller->install_plugin_callback, OCDI\PluginInstaller->activate_plugin, activate_plugin, do_action('activate_all-in-one-seo-pack/all_in_one_seo_pack.php'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->activate, AIOSEO\Plugin\Common\Main\Activate->maybeRunSetupWizard, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:28 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:12:28' )
+	AND `key` = 'admin_notifications_update'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:28 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'admin_notifications_update', `value` = 'i:1658409148;', `expiration` = '2022-07-21 13:12:28', `created` = '2022-07-20 13:12:28', `updated` = '2022-07-20 13:12:28'
+ON DUPLICATE KEY UPDATE `value` = 'i:1658409148;', `expiration` = '2022-07-21 13:12:28', `updated` = '2022-07-20 13:12:28'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:28 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:12:28' )
+	AND `key` = 'pro_just_deactivated_lite'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->init, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:31 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:12:31' )
+	AND `key` = 'admin_notifications_update'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:31 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'admin_notifications_update', `value` = 'i:1658409151;', `expiration` = '2022-07-21 13:12:31', `created` = '2022-07-20 13:12:31', `updated` = '2022-07-20 13:12:31'
+ON DUPLICATE KEY UPDATE `value` = 'i:1658409151;', `expiration` = '2022-07-21 13:12:31', `updated` = '2022-07-20 13:12:31'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:31 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:12:31' )
+	AND `key` = 'pro_just_deactivated_lite'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->init, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:50 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one minute.
+[20-Jul-2022 13:12:50 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one minute.
+[20-Jul-2022 13:12:50 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one minute.
+[20-Jul-2022 13:12:50 UTC] There was an issue purging the cache for this URL: https://canadianmusicgigs.com/. Error code: 429. Message: Too many client connections in one minute.
+[20-Jul-2022 13:12:58 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:12:58' )
+	AND `key` = 'admin_notifications_update'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:58 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'admin_notifications_update', `value` = 'i:1658409178;', `expiration` = '2022-07-21 13:12:58', `created` = '2022-07-20 13:12:58', `updated` = '2022-07-20 13:12:58'
+ON DUPLICATE KEY UPDATE `value` = 'i:1658409178;', `expiration` = '2022-07-21 13:12:58', `updated` = '2022-07-20 13:12:58'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:12:58 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:12:58' )
+	AND `key` = 'pro_just_deactivated_lite'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->init, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:24 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:24' )
+	AND `key` = 'admin_notifications_update'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:24 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'admin_notifications_update', `value` = 'i:1658409204;', `expiration` = '2022-07-21 13:13:24', `created` = '2022-07-20 13:13:24', `updated` = '2022-07-20 13:13:24'
+ON DUPLICATE KEY UPDATE `value` = 'i:1658409204;', `expiration` = '2022-07-21 13:13:24', `updated` = '2022-07-20 13:13:24'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:24 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:24' )
+	AND `key` = 'pro_just_deactivated_lite'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->init, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:30 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:30' )
+	AND `key` = 'admin_notifications_update'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:30 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'admin_notifications_update', `value` = 'i:1658409210;', `expiration` = '2022-07-21 13:13:30', `created` = '2022-07-20 13:13:30', `updated` = '2022-07-20 13:13:30'
+ON DUPLICATE KEY UPDATE `value` = 'i:1658409210;', `expiration` = '2022-07-21 13:13:30', `updated` = '2022-07-20 13:13:30'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:30 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:30' )
+	AND `key` = 'pro_just_deactivated_lite'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->init, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:31 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:31' )
+	AND `key` = 'admin_notifications_update'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:31 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'admin_notifications_update', `value` = 'i:1658409211;', `expiration` = '2022-07-21 13:13:31', `created` = '2022-07-20 13:13:31', `updated` = '2022-07-20 13:13:31'
+ON DUPLICATE KEY UPDATE `value` = 'i:1658409211;', `expiration` = '2022-07-21 13:13:31', `updated` = '2022-07-20 13:13:31'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:31 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:31' )
+	AND `key` = 'pro_just_deactivated_lite'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->init, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:32 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:32' )
+	AND `key` = 'admin_notifications_update'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:32 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'admin_notifications_update', `value` = 'i:1658409212;', `expiration` = '2022-07-21 13:13:32', `created` = '2022-07-20 13:13:32', `updated` = '2022-07-20 13:13:32'
+ON DUPLICATE KEY UPDATE `value` = 'i:1658409212;', `expiration` = '2022-07-21 13:13:32', `updated` = '2022-07-20 13:13:32'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:32 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:32' )
+	AND `key` = 'pro_just_deactivated_lite'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->init, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:36 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:36' )
+	AND `key` = 'admin_notifications_update'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:36 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query INSERT INTO buf_aioseo_cache
+SET `key` = 'admin_notifications_update', `value` = 'i:1658409216;', `expiration` = '2022-07-21 13:13:36', `created` = '2022-07-20 13:13:36', `updated` = '2022-07-20 13:13:36'
+ON DUPLICATE KEY UPDATE `value` = 'i:1658409216;', `expiration` = '2022-07-21 13:13:36', `updated` = '2022-07-20 13:13:36'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Admin\Notices\Notices->init, AIOSEO\Plugin\Common\Admin\Notices\Notices->maybeUpdate, AIOSEO\Plugin\Common\Utils\Cache->update, AIOSEO\Plugin\Common\Utils\Database->run
+[20-Jul-2022 13:13:36 UTC] WordPress database error Table 'db98g0xvkgovbg.buf_aioseo_cache' doesn't exist for query SELECT 
+	`key`, `value`
+FROM buf_aioseo_cache
+WHERE 1 = 1 AND
+	( `expiration` IS NULL OR `expiration` > '2022-07-20 13:13:36' )
+	AND `key` = 'pro_just_deactivated_lite'
+/* 1 = 1 */ made by require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), do_action('init'), WP_Hook->do_action, WP_Hook->apply_filters, AIOSEO\Plugin\Common\Main\Activate->init, AIOSEO\Plugin\Common\Utils\Cache->get, AIOSEO\Plugin\Common\Utils\Database->run
