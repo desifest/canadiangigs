@@ -10,7 +10,7 @@ class LinksMaticAdmin {
     public $ml;
     private $access_level = 4;
     //Slug    
-    public $parrent_slug = 'moveis_links';
+    public $parrent_slug = 'item_links';
     public $admin_page = '/wp-admin/admin.php?page=';
     public $movies_url = '';
     public $parser_url = '';
