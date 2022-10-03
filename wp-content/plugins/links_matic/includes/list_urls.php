@@ -40,7 +40,7 @@ if (sizeof($posts) > 0) {
             <?php $this->sorted_head('id', 'id', $orderby, $order, $page_url) ?>             
             <th><?php print __('Link') ?></th>                                
             <?php if ($campaign->type != 1) { ?>
-                <th><?php print __('Movie ID') ?></th>
+                <th><?php print __('Item ID') ?></th>
             <?php } ?>
             <?php $this->sorted_head('status', 'Status', $orderby, $order, $page_url) ?>                                     
             <?php $this->sorted_head('adate', 'Arhive', $orderby, $order, $page_url) ?>            
