@@ -22,10 +22,6 @@ if (defined('LASTVERSION')) {
     define('LINKS_MATIC_VERSION', $version);
 }
 
-if (!defined(DB_PREFIX_WP)) {
-    global $table_prefix;
-    define(DB_PREFIX_WP, $table_prefix);
-}
 
 function include_links_matic() {
 

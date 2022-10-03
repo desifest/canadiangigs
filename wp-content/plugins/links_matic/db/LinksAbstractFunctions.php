@@ -132,6 +132,11 @@ class LinksAbstractFunctions {
                 return $dict[$option];
             }
         }
+        
+        if (!defined(DB_PREFIX_WP)) {
+            global $table_prefix;
+            define(DB_PREFIX_WP, $table_prefix);
+        }
 
         $data = '';
 
