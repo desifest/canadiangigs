@@ -143,11 +143,11 @@ class LinksMatic extends LinksAbstractDB {
     public function get_post_data($mid, $cid) {
         $post = $this->get_post_by_movie_id_and_cid($mid, $cid);
         $unserialise = array();
-        if ($post) {            
+        if ($post) {
             $options = unserialize($post->options);
             foreach ($options as $key => $value) {
                 $unserialise[$key] = base64_decode($value);
-            }  
+            }
             $post->opt_fields = $unserialise;
         }
         return $post;
@@ -183,7 +183,7 @@ class LinksMatic extends LinksAbstractDB {
             return $this->settings;
         }
         // Get settings from options
-        $settings = unserialize($this->get_option('links_matic_settings'));
+        $settings = unserialize(get_option('links_matic_settings'));
         if ($settings && sizeof($settings)) {
             foreach ($this->settings_def as $key => $value) {
                 if (!isset($settings[$key])) {
@@ -217,12 +217,12 @@ class LinksMatic extends LinksAbstractDB {
             file_put_contents($cookie_path, $form['parser_cookie_text']);
         }
         if (isset($form['web_drivers'])) {
-            $ss['web_drivers'] = base64_encode($new_value);
+            $ss['web_drivers'] = base64_encode($form['web_drivers']);
         }
 
         $this->settings = $ss;
         if (function_exists('update_option')) {
-            $this->update_option('links_matic_settings', serialize($ss));
+            update_option('links_matic_settings', serialize($ss));
         }
     }
 

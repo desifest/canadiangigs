@@ -22,6 +22,11 @@ if (defined('LASTVERSION')) {
     define('LINKS_MATIC_VERSION', $version);
 }
 
+if (!defined(DB_PREFIX_WP)) {
+    global $table_prefix;
+    define(DB_PREFIX_WP, $table_prefix);
+}
+
 function include_links_matic() {
 
     if (!class_exists('LinksMatic')) {
@@ -155,9 +160,9 @@ function links_matic_plugin_activation() {
     $sql = "ALTER TABLE `links_matic_posts` ADD `status_links` int(11) NOT NULL DEFAULT '0'";
     Pdo_wp::db_query($sql);
     links_matic_create_index(array('status_links'), 'links_matic_posts');
-    
-    
-    
+
+
+
     /*
      * Tor
      */
@@ -174,13 +179,13 @@ function links_matic_plugin_activation() {
 				) DEFAULT COLLATE utf8mb4_general_ci;";
     Pdo_wp::db_query($sql);
     links_matic_create_index(array('last_upd', 'status', 'ip', 'agent'), 'tor_drivers');
-    
+
     $sql = "ALTER TABLE `tor_drivers` ADD `type` int(11) NOT NULL DEFAULT '0'";
     Pdo_wp::db_query($sql);
 
     links_matic_create_index(array('type'), 'tor_drivers');
-    
-    
+
+
     $sql = "CREATE TABLE IF NOT EXISTS  `tor_ip`(
 				`id` int(11) unsigned NOT NULL auto_increment,                                                               
                                 `ip` varchar(255) NOT NULL default '',
@@ -229,8 +234,7 @@ function links_matic_plugin_activation() {
 				PRIMARY KEY  (`id`)				
 				) DEFAULT COLLATE utf8mb4_general_ci;";
     Pdo_wp::db_query($sql);
-    links_matic_create_index(array('date', 'driver', 'url', 'ip','agent', 'type', 'status'), 'tor_log');
-    
+    links_matic_create_index(array('date', 'driver', 'url', 'ip', 'agent', 'type', 'status'), 'tor_log');
 }
 
 function links_matic_create_index($names = array(), $table_name = '') {
