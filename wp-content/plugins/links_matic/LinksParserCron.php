@@ -215,10 +215,6 @@ class LinksParserCron extends LinksAbstractDB {
                         foreach ($item as $key => $value) {
                             if ($key == 't') {
                                 $title = $value;
-                            } else if ($key == 'y') {
-                                $year = $value;
-                            } else if ($key == 'r') {
-                                $release = $value;
                             } else {
                                 $post_options[$key] = base64_encode($value);
                             }

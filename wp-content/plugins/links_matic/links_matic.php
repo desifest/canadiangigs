@@ -8,6 +8,21 @@
   Author URI: https://emelianovip.ru
   Version: 1.0.2
   License: GPLv2
+ * 
+ * Parser fields:
+ * job name
+ * job category
+ * job type
+ * location
+ * 
+ * date posted
+ * expire date
+ * 
+ * description
+ * 
+ * company logo
+ * company name
+ * app email/url
  */
 
 

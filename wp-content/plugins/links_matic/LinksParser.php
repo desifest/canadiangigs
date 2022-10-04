@@ -143,10 +143,33 @@ class LinksParser extends LinksAbstractDB {
         'b' => 'Regexp match all (multi)',
         'r' => 'Regexp replace',
     );
+    /*
+     *  * job name
+     * job category
+     * job type
+     * location
+     * 
+     * date posted
+     * expire date
+     * 
+     * description
+     * 
+     * company logo
+     * company name
+     * app email/url
+     */
     public $parser_rules_fields = array(
-        'r' => 'Release',
-        't' => 'Title',
-        'y' => 'Year',
+        't' => 'Job name (title)',
+        'jc' => 'Job category',
+        'jt' => 'Job type',
+        'sl' => 'Salary',
+        'dp' => 'Date posted',
+        'de' => 'Date expire',
+        'loc' => 'Location',        
+        'cn' => 'Company name',
+        'cl' => 'Company logo',
+        'cnt' => 'Contact link',
+        'desc' => 'Description',
         'c' => 'Custom',
     );
     public $parser_rules_actor_fields = array(
