@@ -2556,10 +2556,15 @@ class LinksParser extends LinksAbstractDB {
 
 
             $content = $this->get_post_job_field($type, $post);
-            if (!$content && $type == 'cnt') {
-                $url = $this->get_url($post->uid);
-                $content = $url->link;
+            if (!$content) {
+                if ($type == 'cnt') {
+                    $url = $this->get_url($post->uid);
+                    $content = $url->link;
+                } else if ($type=='jt'){
+                    $content='Default';
+                }
             }
+
 
             if ($content) {
                 // Content rule
@@ -3164,6 +3169,7 @@ class LinksParser extends LinksAbstractDB {
         }
         if (!$found) {
             $found = $settings['job_type'];
+            $found_key = 'Default';
         }
         return array($found => $found_key);
     }
