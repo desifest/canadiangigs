@@ -2560,8 +2560,8 @@ class LinksParser extends LinksAbstractDB {
                 if ($type == 'cnt') {
                     $url = $this->get_url($post->uid);
                     $content = $url->link;
-                } else if ($type=='jt'){
-                    $content='Default';
+                } else if ($type == 'jt') {
+                    $content = 'Default';
                 }
             }
 
@@ -2592,6 +2592,7 @@ class LinksParser extends LinksAbstractDB {
                         }
                     }
                 }
+
                 $results[$type]['content_f'] = $content_f;
 
                 // Rating
@@ -3237,6 +3238,11 @@ class LinksParser extends LinksAbstractDB {
         wp_set_object_terms($post_id, array_keys($results['jt']['content_f']), 'job_listing_type', false);
 
 
+        // Add company logo
+        if ($results['cl']['content_f']) {
+            $this->add_company_logo($post_id, $post, $results['cl']['content_f']);
+        }
+
         return $post_id;
     }
 
@@ -3299,6 +3305,117 @@ class LinksParser extends LinksAbstractDB {
         $job_data = apply_filters('submit_job_form_save_job_data', $job_data, $post_title, $post_content, $status, $values);
         $job_id = wp_insert_post($job_data);
         return $job_id;
+    }
+
+    public function add_company_logo($post_id = 0, $post = array(), $logo_url = '') {
+        if (!$logo_url) {
+            return;
+        }
+        if (preg_match('#^/[^/]+#', $logo_url)) {
+            $url = $this->get_url($post->uid);
+            $dst_url = $url->link;
+
+            if (preg_match('/(http[^\:]*:\/\/[^\/]+)\//i', $dst_url, $matches)) {
+                $domain = $matches[1];
+                $logo_url = $domain . $logo_url;
+            }
+        }
+     
+        $file_content = $this->get_proxy($logo_url);
+        // This is an image&
+        $src_type = $this->isImage($file_content);
+        if (!$src_type) {
+            return;
+        }
+        
+  
+        $allowed_mime_types = [
+            'image/jpeg'=>'.jpg',
+            'image/gif'=> '.gif',
+            'image/png'=> '.png',
+        ];
+        if (!isset($allowed_mime_types[$src_type])){
+            return;
+        }
+
+        global $job_manager_upload, $job_manager_uploading_file;
+        $job_manager_upload = 1;
+        $job_manager_uploading_file = 'company_logo';
+
+        $filename = $post_id . '-' . time() . $allowed_mime_types[$src_type];
+        //$url_add = '/job-manager-uploads/company_logo/'.$filename;
+        $upload = wp_upload_bits($filename, null, $file_content);
+
+        if (empty($upload['error'])) {
+            $attachment_id = $this->create_attachment($upload['url'], $post_id);
+            if ($attachment_id) {
+                set_post_thumbnail($post_id, $attachment_id);
+            }
+        }
+    }
+
+    function isImage($temp_file) {
+        //Провереяем, картинка ли это
+        @list($src_w, $src_h, $src_type_num) = array_values(getimagesizefromstring($temp_file));
+        $src_type = image_type_to_mime_type($src_type_num);
+
+        if (empty($src_w) || empty($src_h) || empty($src_type)) {
+            return '';
+        }
+        return $src_type;
+    }
+
+    /**
+     * Creates a file attachment.
+     *
+     * @param  string $attachment_url
+     * @return int attachment id.
+     */
+    public function create_attachment($attachment_url, $job_id = 0) {
+        include_once ABSPATH . 'wp-admin/includes/image.php';
+        include_once ABSPATH . 'wp-admin/includes/media.php';
+
+        $upload_dir = wp_upload_dir();
+        $attachment_url = esc_url($attachment_url, ['http', 'https']);
+        if (empty($attachment_url)) {
+            return 0;
+        }
+
+        $attachment_url_parts = wp_parse_url($attachment_url);
+
+        // Relative paths aren't allowed.
+        if (false !== strpos($attachment_url_parts['path'], '../')) {
+            return 0;
+        }
+
+        $attachment_url = sprintf('%s://%s%s', $attachment_url_parts['scheme'], $attachment_url_parts['host'], $attachment_url_parts['path']);
+
+        $attachment_url = str_replace([$upload_dir['baseurl'], WP_CONTENT_URL, site_url('/')], [$upload_dir['basedir'], WP_CONTENT_DIR, ABSPATH], $attachment_url);
+        if (empty($attachment_url) || !is_string($attachment_url)) {
+            return 0;
+        }
+
+        $attachment = [
+            'post_title' => wpjm_get_the_job_title($job_id),
+            'post_content' => '',
+            'post_status' => 'inherit',
+            'post_parent' => $job_id,
+            'guid' => $attachment_url,
+        ];
+
+        $info = wp_check_filetype($attachment_url);
+        if ($info) {
+            $attachment['post_mime_type'] = $info['type'];
+        }
+
+        $attachment_id = wp_insert_attachment($attachment, $attachment_url, $job_id);
+
+        if (!is_wp_error($attachment_id)) {
+            wp_update_attachment_metadata($attachment_id, wp_generate_attachment_metadata($attachment_id, $attachment_url));
+            return $attachment_id;
+        }
+
+        return 0;
     }
 
     /*
