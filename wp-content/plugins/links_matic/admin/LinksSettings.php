@@ -7,6 +7,7 @@ class LinksSettings extends ItemAdmin {
     private $mp;
     private $settings_tabs = array(
         'parser' => 'Parser',
+        'job' => 'Job',
         'tor' => 'Tor',
     );
 
@@ -44,6 +45,22 @@ class LinksSettings extends ItemAdmin {
             $ss = $this->ml->get_settings();
 
             include(LINKS_MATIC_PLUGIN_DIR . 'includes/settings_parser.php');
+        } else if ($curr_tab == 'job') {
+
+            if (isset($_POST['ml-nonce'])) {
+                $valid = $this->nonce_validate($_POST);
+                if ($valid === true) {
+                    $this->ml->update_settings($_POST);
+                    $result = __('Updated');
+                    print "<div class=\"updated\"><p><strong>$result</strong></p></div>";
+                } else {
+                    print "<div class=\"error\"><p><strong>$valid</strong></p></div>";
+                }
+            }
+            $ss = $this->ml->get_settings();
+
+            include(LINKS_MATIC_PLUGIN_DIR . 'includes/settings_job.php');
+            
         } else if ($curr_tab == 'tor') {
 
             if (isset($_POST['ml-nonce'])) {

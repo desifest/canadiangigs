@@ -37,7 +37,7 @@ class ParserAdmin extends ItemAdmin {
         1 => 'Random',
     );
     public $parse_number = array(1 => 1, 2 => 2, 3 => 3, 5 => 5, 7 => 7, 10 => 10, 20 => 20, 35 => 35, 50 => 50, 75 => 75, 100 => 100, 200 => 200, 500 => 500, 1000 => 1000);
-    public $gen_urls_number = array(10 => 10, 100 => 100, 500 => 500, 1000 => 1000);    
+    public $gen_urls_number = array(10 => 10, 100 => 100, 500 => 500, 1000 => 1000);
     public $camp_state = array(
         1 => array('title' => 'Active'),
         4 => array('title' => 'Done'),
@@ -956,7 +956,7 @@ class ParserAdmin extends ItemAdmin {
             $parsing['status'] = isset($form_state['status']) ? $form_state['status'] : 0;
 
             // Link to movies
-            $parsing['rules'] = $this->links_rules_form($form_state);
+            $parsing['rules'] = $this->links_jobs_rules_form($form_state);
 
             if ($form_state['import_rules_json']) {
                 $rules = json_decode(trim(stripslashes($form_state['import_rules_json'])), true);
@@ -1913,6 +1913,228 @@ class ParserAdmin extends ItemAdmin {
         ksort($rule_exists);
 
         return $rule_exists;
+    }
+
+    /*
+     * Jobs rules
+     */
+
+    public function show_links_jobs_rules($rules = array(), $data_fields = array(), $edit = true) {
+
+
+        $links_rules_fields = $this->mp->parser_rules_fields;
+
+        $disabled = '';
+        if (!$edit) {
+            $disabled = ' disabled ';
+            $title = __('Link rules');
+            ?>
+            <h2><?php print $title ?></h2>            
+        <?php } ?>
+        <table id="rules" class="wp-list-table widefat striped table-view-list">
+            <thead>
+                <tr>
+                    <th><?php print __('Job field') ?></th>
+                    <th><?php print __('Data field') ?></th> 
+                    <th><?php print __('Type') ?></th> 
+                    <th><?php print __('Rule') ?></th>
+                    <th><?php print __('Match') ?></th>
+                    <th><?php print __('Rating rule') ?></th>
+                    <th><?php print __('Condition') ?></th>
+                    <th><?php print __('Rating') ?></th>
+                    <th><?php print __('Comment') ?></th>                        
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                foreach ($links_rules_fields as $rid => $title) {
+                    if ($rid == 'c') {
+                        continue;
+                    }
+                    $rule = array();
+                    if ($rules) {
+                        foreach ($rules as $rule_id => $rule_data) {
+                            if ($rule_id == $rid) {
+                                $rule = $rule_data;
+                                break;
+                            }
+                        }
+                    }
+                    $reg_t = $rule['t'] ? $rule['t'] : '';
+                    $reg_r = $rule['r'] ? htmlspecialchars(base64_decode($rule['r'])) : "";
+                    $reg_m = $rule['m'] ? $rule['m'] : "";
+                    $reg_d = $rule['d'] ? $rule['d'] : 'def';
+                    $reg_c = $rule['c'] ? $rule['c'] : '';
+
+                    $reg_rr = $rule['rr'] ? htmlspecialchars(base64_decode($rule['rr'])) : "";
+                    $reg_cn = isset($rule['cn']) ? $rule['cn'] : 1;
+                    $reg_ra = $rule['ra'] ? $rule['ra'] : 0;
+                    ?>
+                    <tr>
+                        <td>
+                            <?php print $title; ?>
+                        </td>
+                        <td>
+                            <select name="rule_reg_d_<?php print $rid ?>" class="condition"<?php print $disabled ?>>
+                                <?php
+                                if ($data_fields) {
+                                    foreach ($data_fields as $key => $name) {
+                                        $selected = '';
+                                        if ($reg_d) {
+                                            if ($reg_d == 'def') {
+                                                $selected = ($key == $rid) ? 'selected' : '';
+                                            } else {
+                                                $selected = ($key == $reg_d) ? 'selected' : '';
+                                            }
+                                        }
+                                        ?>
+                                        <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>                                
+                                        <?php
+                                    }
+                                }
+                                ?>                          
+                            </select>  
+                        </td>
+                        <td>
+                            <select name="rule_reg_t_<?php print $rid ?>" class="condition"<?php print $disabled ?>>
+                                <?php
+                                foreach ($this->mp->link_rules_type as $key => $name) {
+                                    $selected = ($key == $reg_t) ? 'selected' : '';
+                                    ?>
+                                    <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>                                
+                                    <?php
+                                }
+                                ?>                          
+                            </select>     
+                        </td>
+                        <td>
+                            <input type="text" name="rule_reg_r_<?php print $rid ?>" class="reg" value="<?php print $reg_r ?>"<?php print $disabled ?>>
+                        </td>
+                        <td>
+                            <input type="text" name="rule_reg_m_<?php print $rid ?>" class="rule_m" value="<?php print $reg_m ?>"<?php print $disabled ?>>
+                        </td>
+
+                        <td>
+                            <input type="text" name="rule_reg_rr_<?php print $rid ?>" class="reg" value="<?php print $reg_rr ?>"<?php print $disabled ?>>
+                        </td>
+
+                        <td>
+                            <select name="rule_reg_cn_<?php print $rid ?>" class="condition"<?php print $disabled ?>>
+                                <?php
+                                foreach ($this->mp->rules_condition as $key => $name) {
+                                    $selected = ($key == $reg_cn) ? 'selected' : '';
+                                    ?>
+                                    <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>                                
+                                    <?php
+                                }
+                                ?>                          
+                            </select>     
+                        </td>
+
+                        <td>
+                            <input type="text" name="rule_reg_ra_<?php print $rid ?>" class="rule_m" value="<?php print $reg_ra ?>"<?php print $disabled ?>>
+                        </td>
+
+                        <td>
+                            <input type="text" name="rule_reg_c_<?php print $rid ?>" class="rule_m" value="<?php print $reg_c ?>"<?php print $disabled ?>>
+                        </td>                         
+
+                    </tr> 
+
+                    <?php
+                }
+                ?>
+            </tbody>
+        </table> 
+        <p class="desc">
+            *Rule example (match/replace): "/(pattern)/Uis".<br />               
+            *Match.  Example: "$1 $2" for regexp. Default: empty.<br />
+            *Rating rule. Example: /music*/i <br />
+            *Rating. How many points the rule will get if rating rule matches.
+        </p>
+        <?php
+    }
+
+    private function links_jobs_rules_form($form_state) {
+        $rule_exists = array();
+
+        $rule_keys = array('t', 'r', 'rr', 'ra', 'm', 'd', 'c', 'cn');
+        $rule_keys_fields = array_keys($this->mp->parser_rules_fields);
+
+        // Exists rules
+
+        foreach ($rule_keys_fields as $field_name) {
+            $upd_rule = array();
+            foreach ($rule_keys as $k) {
+                $form_name = 'rule_reg_' . $k . '_' . $field_name;
+                $form_value = isset($form_state[$form_name]) ? $form_state[$form_name] : '';
+                if ($k == 'r' || $k == 'rr') {
+                    //Regexp encode
+                    $form_value = base64_encode(stripslashes($form_value));
+                }
+                $upd_rule[$k] = $form_value;
+            }
+            $rule_exists[$field_name] = $upd_rule;
+        }
+
+
+        ksort($rule_exists);
+
+        return $rule_exists;
+    }
+
+    public function preview_links_job($preivew_data) {
+
+        if ($preivew_data == -1) {
+            print '<p>No posts found</p>';
+        } else if ($preivew_data) {
+            ?>
+            <h3>Job links result:</h3>
+            <?php
+
+            foreach ($preivew_data as $id => $item) {
+
+                $post = $item['post'];
+                $fields = $item['fields'];
+                $results = $item['results'];
+                $post_title = $post->title . ' [' . $post->id . ']';
+                ?>
+                <h3><?php print $this->mla->theme_parser_url_link($post->uid, $post_title); ?></h3>
+                <?php
+                if (!$results) {
+                    print '<p>Results not found</p>';
+                    continue;
+                }
+                ?>
+                <p class="table-view-list">Total match: <?php print $fields['total_match'] ?>; Total rating: <?php print $fields['total_rating'] ?>; Valid: <?php print $fields['valid']?'<b class="green">True</b>':'<b class="red">False</b>' ?></p>
+                <table class="wp-list-table widefat striped table-view-list">
+                    <thead>
+                        <tr>
+                            <th><?php print __('Field') ?></th>  
+                            <th><?php print __('Content') ?></th>
+                            <th><?php print __('Content filtered') ?></th>
+                            <th><?php print __('Rating') ?></th>                            
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                        <?php foreach ($results as $mid => $data) { ?>
+                            <tr>
+                                <td><?php print $data['title'] ?></td>                
+                                <td><?php print $data['content'] ?></td>
+                                <td><?php print_r($data['content_f']) ?></td>
+                                <td><?php print $data['rating'] ?></td>                                
+                            </tr>
+                        <?php } ?>
+                    </tbody>        
+                </table>
+                <br />
+            <?php } ?>
+        <?php } else { ?>
+            <h3>No results</h3>
+            <p>Check regexp rules.</p>
+            <?php
+        }
     }
 
     /*

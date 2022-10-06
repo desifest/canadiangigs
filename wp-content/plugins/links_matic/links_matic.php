@@ -23,6 +23,13 @@
  * company logo
  * company name
  * app email/url
+ * 
+ * TODO links: 
+ * add default category
+ * add weight rules (exist/match)
+ * show rules result
+ * add jobs from reslults
+ * 
  */
 
 

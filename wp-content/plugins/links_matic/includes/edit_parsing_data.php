@@ -331,8 +331,9 @@ if ($cid) {
 
                     <?php
                     $link_rules = $ol['rules'];
+                    
                     $data_fields = $this->mp->get_parser_fields($options);
-                    $this->show_links_rules($link_rules, $data_fields, $campaign->type);
+                    $this->show_links_jobs_rules($link_rules, $data_fields);
                     ?>
                     <p><b>Export</b> Rules to <a target="_blank" href="<?php print $url ?>&cid=<?php print $cid ?>&export_links_rules=1">JSON array</a>.</p>
                     <p><b>Import</b> Rules from JSON array:</p>

@@ -27,6 +27,9 @@ class LinksMatic extends LinksAbstractDB {
             'tor_get_ip_driver' => '148.251.54.53:8110',
             'tor_ip_h' => 100,
             'tor_ip_d' => 1000,
+            'job_type' => 3,
+            'job_type_alias' => '',
+            'job_expired' => 30,
         );
 
         $this->db = array(
@@ -206,6 +209,18 @@ class LinksMatic extends LinksAbstractDB {
                 $new_value = $form[$key];
                 $ss[$key] = $new_value;
             }
+        }
+
+        if (isset($form['job_type'])) {
+            // Update job types
+            $alias_arr = array();
+            foreach ($form as $key => $value) {
+                if (strstr($key, 'job_type_alias_')) {
+                    $new_key = str_replace('job_type_alias_', '', $key);
+                    $alias_arr[$new_key] = base64_encode($value);
+                }
+            }
+            $ss['job_type_alias'] = serialize($alias_arr);
         }
 
         // Upadate cookie content

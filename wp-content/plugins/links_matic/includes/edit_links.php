@@ -76,33 +76,33 @@ if ($cid) {
                     <span class="input-text-wrap"><input type="rating" name="rating" class="rating" value="<?php print $o['rating'] ?>"></span>
                 </label>
 
-                <label class="inline-edit-interval">
-                    <span class="title"><?php print __('Link to') ?></span>
-                    <select name="type" class="interval">
+                <?php
+                // Categories
+                $job_listing_category = $this->mp->job_listing_category();
+                ?>
+                <label class="inline-edit-interval"> 
+                    <span class="title"><?php print __('Job category') ?></span>         
+                    <select name="jobcat" class="interval">
                         <?php
-                        $rwt_select_link_type = $this->rwt_movie_type;
-                        if ($campaign->type == 1) {
-                            // Actors   
-                            $rwt_select_link_type = $this->rwt_actor_link;
-                        }
-                        // Movies
-                        foreach ($rwt_select_link_type as $key => $value) {
-                            $selected = ($key == $o['type']) ? 'selected' : '';
+                        foreach ($job_listing_category as $item) {
+                            $key = $item->term_id;
+                            $name = $item->name;
+                            $selected = ($key == $o['jobcat']) ? 'selected' : '';
                             ?>
-                            <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $value ?></option>                                
+                            <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>                                
                             <?php
                         }
                         ?>                          
-                    </select> 
-                    <span class="inline-edit"><?php print __('Choose where to look for a match.') ?></span>                    
+                    </select>                     
+                    <span class="inline-edit"><?php print __('Default job category') ?></span> 
                 </label>
+
 
                 <h2>Links rules</h2>
                 <?php
-                $rules = $o['rules'];                
-                $data_fields = $this->mp->get_parser_fields($options);                
-                $data_fields['m']='URL Movie ID';                                               
-                $this->show_links_rules($rules, $data_fields, $campaign->type);
+                $rules = $o['rules'];
+                $data_fields = $this->mp->get_parser_fields($options);
+                $this->show_links_jobs_rules($rules, $data_fields);
                 ?>
                 <p><b>Export</b> Rules to <a target="_blank" href="<?php print $url ?>&cid=<?php print $cid ?>&export_links_rules=1">JSON array</a>.</p>
                 <p><b>Import</b> Rules from JSON array:</p>
@@ -142,10 +142,8 @@ if ($cid) {
     <?php
     if (isset($_POST['preview'])) {
         if ($preivew_data) {
-            $this->preview_links_search($preivew_data);
-        } else if ($preivew_urls_data) {
-            $this->preview_create_found_urls($preivew_urls_data);
-        }
+            $this->preview_links_job($preivew_data);
+        } 
     }
     ?>
 

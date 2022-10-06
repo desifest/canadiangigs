@@ -96,12 +96,13 @@ class LinksParser extends LinksAbstractDB {
                     'pr_num' => 5,
                     'status' => 0,
                     'type' => 'm',
-                    'match' => 2,
-                    'rating' => 20,
+                    'match' => 0,
+                    'rating' => 0,
                     'rules' => '',
                     'custom_last_run_id' => 0,
                     'camp' => 0,
                     'weight' => 10,
+                    'jobcat' => 105
                 ),
             ),
         );
@@ -160,17 +161,30 @@ class LinksParser extends LinksAbstractDB {
      */
     public $parser_rules_fields = array(
         't' => 'Job name (title)',
-        'jc' => 'Job category',
+        // 'jc' => 'Job category',
         'jt' => 'Job type',
         'sl' => 'Salary',
-        'dp' => 'Date posted',
+        // 'dp' => 'Date posted',
         'de' => 'Date expire',
-        'loc' => 'Location',        
+        'loc' => 'Location',
         'cn' => 'Company name',
         'cl' => 'Company logo',
+        'ct' => 'Company tagline',
+        'cw' => 'Company website',
         'cnt' => 'Contact link',
         'desc' => 'Description',
         'c' => 'Custom',
+    );
+    public $parser_rules_meta = array(
+        't' => '_job_title',
+        'sl' => '_job_salary',
+        'de' => '_job_expires',
+        'loc' => '_job_location',
+        'cn' => '_company_name',
+        'ct' => '_company_tagline',
+        'cw' => '_company_website',
+        'cnt' => '_application',
+        'desc' => '_job_description',
     );
     public $parser_rules_actor_fields = array(
         't' => 'Title',
@@ -229,6 +243,10 @@ class LinksParser extends LinksAbstractDB {
         'm' => 'Regexp match',
         'a' => 'Regexp match all',
         'r' => 'Regexp replace',
+    );
+    public $rules_condition = array(
+        1 => 'True',
+        0 => 'False',
     );
     private $movie_type = array(
         'a' => '',
@@ -1689,7 +1707,7 @@ class LinksParser extends LinksAbstractDB {
         $rules = $options['parsing']['rules'];
         $rules_sort = $this->sort_reg_rules_by_weight($rules, $parser_rules_fields);
 
-        $ret = array();
+        $ret = array('none' => 'None');
         if ($rules_sort) {
             foreach ($rules_sort as $key => $rule) {
                 $rule_key = $rule['f'];
@@ -2505,6 +2523,122 @@ class LinksParser extends LinksAbstractDB {
         return array('fields' => $search_fields, 'results' => $results);
     }
 
+    public function check_link_job_post($o, $post, $movie_id = 0) {
+        $rules_all = $o['rules'];
+
+        $results = array();
+
+        /*
+
+          't' => 'Job name (title)',
+          'jc' => 'Job category',
+          'jt' => 'Job type',
+          'sl' => 'Salary',
+          'dp' => 'Date posted',
+          'de' => 'Date expire',
+          'loc' => 'Location',
+          'cn' => 'Company name',
+          'cl' => 'Company logo',
+          'cnt' => 'Contact link',
+          'desc' => 'Description',
+         */
+
+        // Find active rules
+
+        $total_rating = 0;
+        $total_match = 0;
+
+        foreach ($this->parser_rules_fields as $type => $title) {
+            if ($type == 'c') {
+                continue;
+            }
+            $rules = isset($rules_all[$type]) ? $rules_all[$type] : array();
+
+
+            $content = $this->get_post_job_field($type, $post);
+            if (!$content && $type == 'cnt') {
+                $url = $this->get_url($post->uid);
+                $content = $url->link;
+            }
+
+            if ($content) {
+                // Content rule
+
+                $results[$type]['title'] = $title;
+                $results[$type]['rule'] = $rules;
+                $results[$type]['content'] = $content;
+
+                $content_f = $rules ? $this->use_reg_rule($rules, $content) : $content;
+                // TODO Custom fields type parse: date, job type.
+                if ($type == 'jt') {
+                    // Get type from options
+                    $content_f = $this->filter_job_type($content_f);
+                } else if ($type == 'dp' || $type == 'de') {
+                    // Date logic  
+                    $content_f = trim($content_f);
+                    if ($content_f) {
+                        $content_time = strtotime($content_f);
+                        $curr_time = $this->curr_time();
+                        $one_year = 360 * 86400;
+                        if (($curr_time + $one_year > $content_time) && ($curr_time - $one_year < $content_time)) {
+                            $content_f = $content_time;
+                        } else {
+                            $content_f = 0;
+                        }
+                    }
+                }
+                $results[$type]['content_f'] = $content_f;
+
+                // Rating
+                $results[$type]['rating'] = 0;
+                if ($rules['ra']) {
+                    $reg = base64_decode($rules['rr']);
+                    $match = preg_match($reg, $content);
+                    $condition = isset($rules['cn']) && $rules['cn'] == 1 ? true : false;
+
+
+                    if (($match && $condition) || (!$match && !$condition)) {
+                        $rating = (int) $rules['ra'];
+                        $results[$type]['rating'] = $rating;
+                        $total_rating += $rating;
+                        $total_match += 1;
+                    }
+                }
+            }
+        }
+
+
+        $valid = 1;
+        if ($o['match'] > 0 && $total_match < $o['match']) {
+            $valid = 0;
+        }
+        if ($valid && $o['rating'] > 0 && $total_rating < $o['rating']) {
+            $valid = 0;
+        }
+
+
+        $fields = array(
+            'total_rating' => $total_rating,
+            'total_match' => $total_match,
+            'valid' => $valid
+        );
+
+        return array('fields' => $fields, 'results' => $results);
+    }
+
+    public function get_post_job_field($field, $post) {
+        if ($field == 't') {
+            return $post->title;
+        } else {
+            //Custom field
+            $option_name = preg_replace('/^c-/', '', $field);
+            $post_options = unserialize($post->options);
+            if (isset($post_options[$option_name]))
+                return base64_decode($post_options[$option_name]);
+        }
+        return '';
+    }
+
     public function get_post_field($field, $post) {
         if ($field['d'] == 't') {
             return $post->title;
@@ -2568,13 +2702,9 @@ class LinksParser extends LinksAbstractDB {
         $ret = array();
         if (sizeof($posts)) {
             foreach ($posts as $post) {
-                if ($camp_type == 1) {
-                    // Actors   
-                    $results = $this->check_link_actor_post($o, $post);
-                } else {
-                    // Movies
-                    $results = $this->check_link_post($o, $post);
-                }
+
+                $results = $this->check_link_job_post($o, $post);
+
                 $results['post'] = $post;
                 $ret[$post->id] = $results;
             }
@@ -2967,6 +3097,202 @@ class LinksParser extends LinksAbstractDB {
     public function delete_log($uid) {
         $sql = sprintf("DELETE FROM {$this->db['log']} WHERE uid=%d", (int) $uid);
         $this->db_query($sql);
+    }
+
+    /*
+     * Job category
+     */
+
+    public function job_listing_category() {
+        $terms = get_terms(['taxonomy' => 'job_listing_category', 'hide_empty' => false]);
+        return $terms;
+    }
+
+    public function job_listing_type() {
+        $terms = get_terms(['taxonomy' => 'job_listing_type', 'hide_empty' => false]);
+        return $terms;
+    }
+
+    public function job_types_form($terms, $job_type_alias = '') {
+        $alias_arr = array();
+        if ($job_type_alias) {
+            $alias_arr = unserialize($job_type_alias);
+        }
+        ?>
+
+        <?php
+        foreach ($terms as $item) {
+            $key = $item->term_id;
+            $name = $item->name;
+            $value = isset($alias_arr[$key]) ? htmlspecialchars(base64_decode($alias_arr[$key])) : '';
+            ?>
+            <p><?php print $name ?></p>
+            <textarea name="job_type_alias_<?php print $key ?>" style="width:90%" rows="3"><?php print $value; ?></textarea>                               
+            <?php
+        }
+    }
+
+    public function filter_job_type($content = '') {
+        $settings = $this->ml->get_settings();
+
+        $found = 0;
+        $found_key = '';
+        $job_type_alias = $settings['job_type_alias'];
+        $alias_arr = array();
+        if ($job_type_alias) {
+            $alias_arr = unserialize($job_type_alias);
+            if ($alias_arr) {
+
+                foreach ($alias_arr as $key => $value) {
+                    if ($found) {
+                        break;
+                    }
+                    $alias_str = base64_decode($value);
+                    if ($alias_str) {
+                        $keys = explode(',', $alias_str);
+                        foreach ($keys as $keyword) {
+                            $keyword = trim($keyword);
+                            if (preg_match("/" . $keyword . "/i", $content)) {
+                                $found = $key;
+                                $found_key = $keyword;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!$found) {
+            $found = $settings['job_type'];
+        }
+        return array($found => $found_key);
+    }
+
+    public function add_job_post($campaign = array(), $post = array(), $results = array()) {
+        /*
+          't' => 'Job name (title)',
+          'jc' => 'Job category',
+          'jt' => 'Job type',
+          'sl' => 'Salary',
+          'dp' => 'Date posted',
+          'de' => 'Date expire',
+          'loc' => 'Location',
+          'cn' => 'Company name',
+          'cl' => 'Company logo',
+          'cnt' => 'Contact link',
+          'desc' => 'Description',
+          'c' => 'Custom',
+         */
+
+
+        $status = 'publish';
+        $values = array(
+            'company' => array(
+                'company_name' => $results['cn']['content_f'] ? $results['cn']['content_f'] : '',
+            ),
+            'job' => array(
+                'job_location' => $results['loc']['content_f'] ? $results['loc']['content_f'] : '',
+                'job_type' => $results['jt']['content_f'] ? array(array_keys($results['jt']['content_f'])) : array()
+            ),
+        );
+
+        $post_title = $results['t']['content_f'];
+        $post_content = $results['desc']['content_f'];
+        $post_id = $this->save_job($post_title, $post_content, $status, $values);
+
+
+
+
+        // Validate meta
+        if (!$results['de']['content_f']) {
+            $settings = $this->ml->get_settings();
+            $job_expired = (int) $settings['job_expired'];
+
+            $exp_time = $this->curr_time() + $job_expired * 86400;
+            $results['de']['content_f'] = date('Y-m-d', $exp_time);
+        } else if ($results['de']['content_f'] > 0) {
+            $results['de']['content_f'] = date('Y-m-d', $results['de']['content_f']);
+        }
+
+        // Add post meta
+        foreach ($this->parser_rules_meta as $key => $value) {
+            if ($results[$key]['content_f']) {
+                update_post_meta($post_id, $value, $results[$key]['content_f']);
+            }
+        }
+
+        // Save taxonomies. Default category
+        $options = $this->get_options($campaign);
+        $o = $options['links'];
+        $categories = (int) $o['jobcat'];
+        wp_set_object_terms($post_id, $categories, 'job_listing_category', false);
+
+        // Get job type
+        wp_set_object_terms($post_id, array_keys($results['jt']['content_f']), 'job_listing_type', false);
+
+
+        return $post_id;
+    }
+
+    /**
+     * Updates or creates a job listing from posted data.
+     *
+     * @param  string $post_title
+     * @param  string $post_content
+     * @param  string $status
+     * @param  array  $values
+     * @param  bool   $update_slug
+     */
+    public function save_job($post_title, $post_content, $status = 'preview', $values = [], $update_slug = true) {
+        $job_data = [
+            'post_title' => $post_title,
+            'post_content' => $post_content,
+            'post_type' => 'job_listing',
+            'comment_status' => 'closed',
+        ];
+
+        if ($update_slug) {
+            $job_slug = [];
+
+            // Prepend with company name.
+            if (apply_filters('submit_job_form_prefix_post_name_with_company', true) && !empty($values['company']['company_name'])) {
+                $job_slug[] = $values['company']['company_name'];
+            }
+
+            // Prepend location.
+            if (apply_filters('submit_job_form_prefix_post_name_with_location', true) && !empty($values['job']['job_location'])) {
+                $job_slug[] = $values['job']['job_location'];
+            }
+
+            // Prepend with job type.
+            if (apply_filters('submit_job_form_prefix_post_name_with_job_type', true) && !empty($values['job']['job_type'])) {
+                if (!job_manager_multi_job_type()) {
+                    $job_slug[] = $values['job']['job_type'];
+                } else {
+                    $terms = $values['job']['job_type'];
+
+                    foreach ($terms as $term) {
+                        $term = get_term_by('id', intval($term), 'job_listing_type');
+
+                        if ($term) {
+                            $job_slug[] = $term->slug;
+                        }
+                    }
+                }
+            }
+
+            $job_slug[] = $post_title;
+            $job_data['post_name'] = sanitize_title(implode('-', $job_slug));
+        }
+
+        if ($status) {
+            $job_data['post_status'] = $status;
+        }
+
+
+        $job_data = apply_filters('submit_job_form_save_job_data', $job_data, $post_title, $post_content, $status, $values);
+        $job_id = wp_insert_post($job_data);
+        return $job_id;
     }
 
     /*

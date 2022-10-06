@@ -421,9 +421,6 @@ class LinksParserCron extends LinksAbstractDB {
         $cid = $campaign->id;
         $type_opt = $options[$type_name];
 
-        //Movies custom hook
-        $mch = $this->ml->get_mch();
-
         // Get posts (last is first)        
         $urls_count = $type_opt['num'];
         $count = 0;
@@ -443,80 +440,26 @@ class LinksParserCron extends LinksAbstractDB {
                 $results = $item['results'];
 
                 if ($results) {
-                    if ($campaign->type == 1) {
-                        // Actors
-                        /*
-                         *  [13336028] => Array
-                          (
-                          [lastname] => Array
-                          (
-                          [data] => Caskey
-                          [match] => 1
-                          [rating] => 10
-                          )
 
-                          [total] => Array
-                          (
-                          [match] => 1
-                          [rating] => 10
-                          [valid] => 1
-                          [top] => 1
-                          )
+                    if ($fields['valid']) {
+                        // Add post
+                        $status = 1;
+                        $rating = $fields['total_rating'];
 
-                          )
-                         */
-                        $find_last = 0;
-                        $valid_actors = array();
-                        foreach ($results as $aid => $data) {
-                            if ($data['total']['valid'] == 1) {
-                                // Add meta
-                                // $this->mp->add_post_actor_meta($aid, $pid, $cid);
-                                $find_last = $aid;
-                                $valid_actors[] = $aid;
-                            }
-                        }
-
-                        if ($find_last) {
-                            // Add link
-                            $status = 1;
-                            $rating = $results[$find_last]['total']['rating'];
-                            $this->mp->update_post_top_movie($post->uid, $status, $find_last, $rating);
-
-                            $message = "Found author link: name: " . $post->title . "; aid: $find_last; rating: $rating";
+                        $top_movie = $this->mp->add_job_post($campaign, $post, $results);
+                        if ($top_movie > 0) {
+                            $this->mp->update_post_top_movie($post->uid, $status, $top_movie, $rating);
+                            $message = "Add job: title: " . $post->title . "; jid: $top_movie; rating: $rating";
                             $this->mp->log_info($message, $cid, $post->uid, 4);
-
-                            $mch->add_actors($campaign, $post);
                         } else {
                             $this->mp->update_post_status($post->uid, 2);
-                            $message = 'Found posts is not valid';
-                            $this->mp->log_warn($message, $cid, $post->uid, 4);
+                            $message = 'Can not add job post';
+                            $this->mp->log_error($message, $cid, $post->uid, 4);
                         }
                     } else {
-                        // Movies
-
-                        $find_movie = 0;
-                        foreach ($results as $mid => $data) {
-                            if ($data['total']['top'] == 1) {
-                                $find_movie = $mid;
-                                break;
-                            }
-                        }
-                        if ($find_movie) {
-                            // Add link
-                            $status = 1;
-                            $rating = $results[$find_movie]['total']['rating'];
-                            $this->mp->update_post_top_movie($post->uid, $status, $find_movie, $rating);
-
-                            $message = "Found post link: title: " . $post->title . "; mid: $find_movie; rating: $rating";
-                            $this->mp->log_info($message, $cid, $post->uid, 4);
-
-                            $post->top_movie = $find_movie;
-                            $mch->add_post($campaign, $post);
-                        } else {
-                            $this->mp->update_post_status($post->uid, 2);
-                            $message = 'Found posts is not valid';
-                            $this->mp->log_warn($message, $cid, $post->uid, 4);
-                        }
+                        $this->mp->update_post_status($post->uid, 2);
+                        $message = 'The post is not valid';
+                        $this->mp->log_warn($message, $cid, $post->uid, 4);
                     }
                 } else {
                     // Link post not found
@@ -722,7 +665,7 @@ class LinksParserCron extends LinksAbstractDB {
             $campaign = $this->mp->get_campaign($cid);
             $options = $this->mp->get_options($campaign);
             $type_opt = $options[$type_name];
-            $urls_count = $type_opt['num'];            
+            $urls_count = $type_opt['num'];
 
             // Get last urls
             $status = 0;
