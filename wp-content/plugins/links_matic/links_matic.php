@@ -253,6 +253,20 @@ function links_matic_plugin_activation() {
 				) DEFAULT COLLATE utf8mb4_general_ci;";
     Pdo_wp::db_query($sql);
     links_matic_create_index(array('date', 'driver', 'url', 'ip', 'agent', 'type', 'status'), 'tor_log');
+    
+    /*
+     * Company
+     */
+    $sql = "CREATE TABLE IF NOT EXISTS  `links_matic_company`(
+				`id` int(11) unsigned NOT NULL auto_increment,
+                                `attachment_id` int(11) NOT NULL DEFAULT '0',
+                                `title` varchar(255) NOT NULL default '',
+                                `link_hash` varchar(255) NOT NULL default '',                                
+                                `link` text default NULL,               
+				PRIMARY KEY  (`id`)				
+				) DEFAULT COLLATE utf8mb4_general_ci;";
+    Pdo_wp::db_query($sql);
+    links_matic_create_index(array('attachment_id', 'link_hash'), 'links_matic_company');
 }
 
 function links_matic_create_index($names = array(), $table_name = '') {

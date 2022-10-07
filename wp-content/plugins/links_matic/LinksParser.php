@@ -16,6 +16,7 @@ class LinksParser extends LinksAbstractDB {
             'log' => 'links_matic_log',
             'posts' => 'links_matic_posts',
             'url' => 'links_matic_url',
+            'company' => 'links_matic_company',
             'actors_meta' => 'actors_meta',
         );
 
@@ -3240,7 +3241,7 @@ class LinksParser extends LinksAbstractDB {
 
         // Add company logo
         if ($results['cl']['content_f']) {
-            $this->add_company_logo($post_id, $post, $results['cl']['content_f']);
+            $this->add_company_logo($post_id, $post, $results['cl']['content_f'], $results['cn']['content_f']);
         }
 
         return $post_id;
@@ -3307,7 +3308,7 @@ class LinksParser extends LinksAbstractDB {
         return $job_id;
     }
 
-    public function add_company_logo($post_id = 0, $post = array(), $logo_url = '') {
+    public function add_company_logo($post_id = 0, $post = array(), $logo_url = '', $company_name = '') {
         if (!$logo_url) {
             return;
         }
@@ -3320,21 +3321,29 @@ class LinksParser extends LinksAbstractDB {
                 $logo_url = $domain . $logo_url;
             }
         }
-     
+
+        $link_hash = $this->link_hash($logo_url);
+        $company_exist = $this->get_company_by_hash($link_hash);
+
+        if ($company_exist) {
+            $attachment_id = $company_exist->attachment_id;
+            set_post_thumbnail($post_id, $attachment_id);
+            return;
+        }
+
         $file_content = $this->get_proxy($logo_url);
         // This is an image&
         $src_type = $this->isImage($file_content);
         if (!$src_type) {
             return;
         }
-        
-  
+
         $allowed_mime_types = [
-            'image/jpeg'=>'.jpg',
-            'image/gif'=> '.gif',
-            'image/png'=> '.png',
+            'image/jpeg' => '.jpg',
+            'image/gif' => '.gif',
+            'image/png' => '.png',
         ];
-        if (!isset($allowed_mime_types[$src_type])){
+        if (!isset($allowed_mime_types[$src_type])) {
             return;
         }
 
@@ -3343,13 +3352,20 @@ class LinksParser extends LinksAbstractDB {
         $job_manager_uploading_file = 'company_logo';
 
         $filename = $post_id . '-' . time() . $allowed_mime_types[$src_type];
-        //$url_add = '/job-manager-uploads/company_logo/'.$filename;
         $upload = wp_upload_bits($filename, null, $file_content);
 
         if (empty($upload['error'])) {
             $attachment_id = $this->create_attachment($upload['url'], $post_id);
             if ($attachment_id) {
                 set_post_thumbnail($post_id, $attachment_id);
+                // Upade hash
+                $data = array(
+                    'attachment_id' => $attachment_id,
+                    'title' => $company_name,
+                    'link_hash' => $link_hash,
+                    'link' => $logo_url,
+                );
+                $this->db_insert($data, $this->db['company']);
             }
         }
     }
@@ -3416,6 +3432,12 @@ class LinksParser extends LinksAbstractDB {
         }
 
         return 0;
+    }
+
+    public function get_company_by_hash($link_hash) {
+        $sql = sprintf("SELECT * FROM {$this->db['company']} WHERE link_hash = '%s'", $link_hash);
+        $result = $this->db_fetch_row($sql);
+        return $result;
     }
 
     /*
