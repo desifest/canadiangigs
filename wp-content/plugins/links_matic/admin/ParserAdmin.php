@@ -904,6 +904,7 @@ class ParserAdmin extends ItemAdmin {
 
             if ($form_state['edit_parsing_options']) {
                 $add_result['status'] = isset($form_state['status']) ? $form_state['status'] : 0;
+                $add_result['jobapi'] = isset($form_state['jobapi']) ? $form_state['jobapi'] : 0;                
             } else if ($form_state['edit_parsing_data']) {
                 // Rules logic
                 $add_result['rules'] = $this->parser_rules_form($form_state);

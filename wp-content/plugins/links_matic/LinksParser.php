@@ -89,6 +89,7 @@ class LinksParser extends LinksAbstractDB {
                     'rules' => '',
                     'row_rules' => '',
                     'row_status' => 0,
+                    'jobapi' => 1,
                 ),
                 'links' => array(
                     'last_update' => 0,
@@ -103,7 +104,7 @@ class LinksParser extends LinksAbstractDB {
                     'custom_last_run_id' => 0,
                     'camp' => 0,
                     'weight' => 10,
-                    'jobcat' => 105
+                    'jobcat' => 105,
                 ),
             ),
         );
@@ -135,6 +136,7 @@ class LinksParser extends LinksAbstractDB {
         'm' => 'Regexp match',
         'a' => 'Regexp match all',
         'r' => 'Regexp replace',
+        'j' => 'Regexp match json',
     );
     public $parser_row_rules_type = array(
         'x' => 'XPath',
@@ -162,10 +164,10 @@ class LinksParser extends LinksAbstractDB {
      */
     public $parser_rules_fields = array(
         't' => 'Job name (title)',
-        // 'jc' => 'Job category',
+        'jc' => 'Job category',
         'jt' => 'Job type',
         'sl' => 'Salary',
-        // 'dp' => 'Date posted',
+        'dp' => 'Date posted',
         'de' => 'Date expire',
         'loc' => 'Location',
         'cn' => 'Company name',
@@ -1389,22 +1391,27 @@ class LinksParser extends LinksAbstractDB {
                 $code = $this->get_arhive_file($cid, $link_hash);
                 $result = array();
                 if ($code) {
-                    // Use reg rules
-                    if ($rules_name == 'rules' && $o['row_status'] == 1) {
-                        // Get rows, multi resulst
-                        $rules_fields = $this->parser_row_rules_fields;
-                        $row = $this->check_reg_post($o, 'row_rules', $code, $rules_fields);
-                        if ($row['t']) {
-                            $row_content = $row['t'];
-                            $rules_fields = $this->parser_urls_rules_fields;
-                            $result = $this->check_reg_post($o, 'rules', $row_content, $rules_fields);
-                        }
+                    // Google job api
+                    if ($o['jobapi'] == 1) {
+                        $result = $this->get_data_job_api($code);
                     } else {
-                        $rules_fields = array();
-                        if ($campaign->type == 2) {
-                            $rules_fields = $this->parser_urls_rules_fields;
+                        // Use reg rules
+                        if ($rules_name == 'rules' && $o['row_status'] == 1) {
+                            // Get rows, multi resulst
+                            $rules_fields = $this->parser_row_rules_fields;
+                            $row = $this->check_reg_post($o, 'row_rules', $code, $rules_fields);
+                            if ($row['t']) {
+                                $row_content = $row['t'];
+                                $rules_fields = $this->parser_urls_rules_fields;
+                                $result = $this->check_reg_post($o, 'rules', $row_content, $rules_fields);
+                            }
+                        } else {
+                            $rules_fields = array();
+                            if ($campaign->type == 2) {
+                                $rules_fields = $this->parser_urls_rules_fields;
+                            }
+                            $result = $this->check_reg_post($o, $rules_name, $code, $rules_fields);
                         }
-                        $result = $this->check_reg_post($o, $rules_name, $code, $rules_fields);
                     }
                 }
                 $ret[$item->uid] = $result;
@@ -1440,6 +1447,9 @@ class LinksParser extends LinksAbstractDB {
                 $rule_cnt[] = $this->get_reg_match_all($reg, $rule['m'], $cnt, false);
             } else if ($rule['t'] == 'r') {
                 $rule_cnt[] = $this->get_reg($reg, $rule['m'], $cnt);
+            } else if ($rule['t'] == 'j') {
+                //json rule
+                $rule_cnt[] = $this->get_reg_json($reg, $rule['m'], $cnt);
             } else if ($rule['t'] == 'n') {
                 //No rules   
                 $rule_cnt = $cnt;
@@ -1645,6 +1655,41 @@ class LinksParser extends LinksAbstractDB {
             $content = preg_replace($rule, $match_str, $content);
         }
         return $content;
+    }
+
+    private function get_reg_json($rule, $match_str, $content) {
+        //Filters reg
+        $ret = '';
+        if ($rule && $content) {
+            if (preg_match($rule, $content, $match)) {
+                if ($match[1]) {
+                    $decode = json_decode($match[1], true);
+                    /* print '<pre>';
+                      print_r($decode);
+                      print '</pre>'; */
+                    if ($decode) {
+                        if (strstr($match_str, '.')) {
+                            $match_str_arr = explode('.', $match_str);
+                            $ret_child = $decode;
+                            foreach ($match_str_arr as $key) {
+                                if ($key && isset($ret_child[$key])) {
+                                    $ret_child = $ret_child[$key];
+                                } else {
+                                    $ret_child = '';
+                                    break;
+                                }
+                            }
+                            $ret = $ret_child;
+                        } else {
+                            if (isset($decode[$match_str])) {
+                                $ret = $decode[$match_str];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $ret;
     }
 
     private function get_reg_match($rule, $match_str, $content) {
@@ -3109,6 +3154,89 @@ class LinksParser extends LinksAbstractDB {
     /*
      * Job category
      */
+
+    public function get_data_job_api($code) {
+        /*
+          public $parser_rules_fields = array(
+          't' => 'Job name (title)',
+          'jc' => 'Job category',
+          'jt' => 'Job type',
+          'sl' => 'Salary',
+          'dp' => 'Date posted',
+          'de' => 'Date expire',
+          'loc' => 'Location',
+          'cn' => 'Company name',
+          'cl' => 'Company logo',
+          'ct' => 'Company tagline',
+          'cw' => 'Company website',
+          'cnt' => 'Contact link',
+          'desc' => 'Description',
+          'c' => 'Custom',
+          );
+         */
+        $ret = array();
+        if (preg_match('/<script[^>]*>([^<]*type":"JobPosting"[^<]+)<\/script>/s', $code, $match)) {
+            $decode = json_decode($match[1], true);
+            $rules_fields = $this->parser_rules_fields;
+            foreach ($rules_fields as $key => $title) {
+                if ($key == 't') {
+                    $ret[$key] = isset($decode['title']) ? $decode['title'] : '';
+                } else if ($key == 'jt') {
+                    $jt = isset($decode['employmentType']) ? $decode['employmentType'] : '';
+                    if (is_array($jt)) {
+                        $jt = implode(',', $jt);
+                    }
+                    $ret[$key] = $jt;
+                } else if ($key == 'sl') {
+                    $salary = isset($decode['estimatedSalary']) ? $decode['estimatedSalary'] : '';
+                    $salary_text = '';
+                    $salary_arr = array();
+                    if (isset($salary['value']['minValue'])) {
+                        $summ = '$' . round($salary['value']['minValue'], 0);
+                        $salary_arr[$summ] = $summ;
+                    }
+                    if (isset($salary['value']['maxValue'])) {
+                        $summ = '$' . round($salary['value']['maxValue'], 0);
+                        $salary_arr[$summ] = $summ;
+                    }
+                    if ($salary_arr) {
+                        $salary_text = implode(' - ', $salary_arr);
+                        if (isset($salary['value']['unitText'])) {
+                            $salary_text .= ' per ' . strtolower($salary['value']['unitText']);
+                        }
+                    }
+                    $ret[$key] = $salary_text;
+                } else if ($key == 'dp') {
+                    $ret[$key] = isset($decode['datePosted']) ? $decode['datePosted'] : '';
+                } else if ($key == 'de') {
+                    $ret[$key] = isset($decode['validThrough']) ? $decode['validThrough'] : '';
+                } else if ($key == 'loc') {
+                    if (isset($decode['jobLocation']['address'])) {
+                        $adr = $decode['jobLocation']['address'];
+                        $loc = array();
+                        if (isset($adr['addressLocality'])) {
+                            $loc[] = $adr['addressLocality'];
+                        }
+                        if (isset($adr['addressRegion'])) {
+                            $loc[] = $adr['addressRegion'];
+                        }
+                        if ($loc) {
+                            $ret[$key] = implode(', ', $loc);
+                        }
+                    }
+                } else if ($key == 'cn') {
+                    $ret[$key] = isset($decode['hiringOrganization']['name']) ? $decode['hiringOrganization']['name'] : '';
+                } else if ($key == 'cw') {
+                    $ret[$key] = isset($decode['hiringOrganization']['sameAs']) ? $decode['hiringOrganization']['sameAs'] : '';
+                } else if ($key == 'cl') {
+                    $ret[$key] = isset($decode['hiringOrganization']['logo']) ? $decode['hiringOrganization']['logo'] : '';
+                } else if ($key == 'desc') {
+                    $ret[$key] = isset($decode['description']) ? html_entity_decode($decode['description']) : '';
+                }
+            }
+        }
+        return $ret;
+    }
 
     public function job_listing_category() {
         $terms = get_terms(['taxonomy' => 'job_listing_category', 'hide_empty' => false]);

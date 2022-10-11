@@ -11,6 +11,7 @@ print $tabs;
 if ($cid) {
     $options = $this->mp->get_options($campaign);
     $o = $options['parsing'];
+    $job_api = false;
     ?>
     <form accept-charset="UTF-8" method="post" id="campaign">
 
@@ -53,12 +54,25 @@ if ($cid) {
                 <label class="inline-edit-status">                
                     <?php
                     $checked = '';
-                    if ($o['status'] == 1) {
+                    if ($o['status'] == 1 || $o['status'] == 3) {
                         $checked = 'checked="checked"';
                     }
                     ?>
                     <input type="checkbox" name="status" value="1" <?php print $checked ?> >
                     <span class="checkbox-title"><?php print __('Parser is active') ?></span>
+                </label>
+
+
+                <label class="inline-edit-status">                
+                    <?php
+                    $checked = '';
+                    if ($o['jobapi'] == 1) {
+                        $checked = 'checked="checked"';
+                        $job_api = true;
+                    }
+                    ?>
+                    <input type="checkbox" name="jobapi" value="1" <?php print $checked ?> >
+                    <span class="checkbox-title"><?php print __('Use Google job api for parsing data') ?></span>
                 </label>
                 <br />
                 <?php wp_nonce_field('ml-nonce', 'ml-nonce'); ?>
@@ -179,23 +193,25 @@ if ($cid) {
 
     <form accept-charset="UTF-8" method="post" id="campaign">
         <div class="cm-edit inline-edit-row">
-            <fieldset>
-                <input type="hidden" name="edit_parsing_data" value="1">
+            <fieldset>                
                 <input type="hidden" name="id" class="id" value="<?php print $campaign->id ?>">
-                <h2>Parser rules</h2>
-                <?php
-                $parser_rules = $o['rules'];
-                $this->show_parser_rules($parser_rules, true, $campaign->type);
-                ?> 
-                <p><b>Export</b> Rules to <a target="_blank" href="<?php print $url ?>&cid=<?php print $cid ?>&export_rules=1">JSON array</a>.</p>
-                <p><b>Import</b> Rules from JSON array:</p>
-                <div class="inline-edit-row">
-                    <fieldset>              
-                        <textarea name="import_rules_json" style="width:100%" rows="3"></textarea>           
-                    </fieldset>
-                </div>
-                <div class="desc">Warning: adding new rules will replace all previous rules.</div>
-                <br />
+                <?php if (!$job_api) { ?>
+                <input type="hidden" name="edit_parsing_data" value="1">
+                    <h2>Parser rules</h2>
+                    <?php
+                    $parser_rules = $o['rules'];
+                    $this->show_parser_rules($parser_rules, true, $campaign->type);
+                    ?> 
+                    <p><b>Export</b> Rules to <a target="_blank" href="<?php print $url ?>&cid=<?php print $cid ?>&export_rules=1">JSON array</a>.</p>
+                    <p><b>Import</b> Rules from JSON array:</p>
+                    <div class="inline-edit-row">
+                        <fieldset>              
+                            <textarea name="import_rules_json" style="width:100%" rows="3"></textarea>           
+                        </fieldset>
+                    </div>
+                    <div class="desc">Warning: adding new rules will replace all previous rules.</div>
+                    <br />
+                <?php } ?>
 
                 <label class="inline-edit-status">                
                     <input type="checkbox" name="preview" value="1" checked="checked">
@@ -331,7 +347,7 @@ if ($cid) {
 
                     <?php
                     $link_rules = $ol['rules'];
-                    
+
                     $data_fields = $this->mp->get_parser_fields($options);
                     $this->show_links_jobs_rules($link_rules, $data_fields);
                     ?>

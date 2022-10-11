@@ -325,6 +325,7 @@ if ($cid) {
             </div>
         </form>
     <?php endif; ?>
+     <?php /*
     <br />
     <hr />
     <h2>Generate URLs from ZR database</h2>
@@ -485,6 +486,6 @@ if ($cid) {
 
     <?php } ?>
 
-
+*/ ?>
 
 <?php } ?>

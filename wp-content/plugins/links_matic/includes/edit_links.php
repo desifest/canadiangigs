@@ -58,12 +58,12 @@ if ($cid) {
                 <label class="inline-edit-status">                
                     <?php
                     $checked = '';
-                    if ($o['status'] == 1) {
+                    if ($o['status'] == 1 || $o['status'] == 3) {
                         $checked = 'checked="checked"';
                     }
                     ?>
                     <input type="checkbox" name="status" value="1" <?php print $checked ?> >
-                    <span class="checkbox-title"><?php print __('Parser is active') ?></span>
+                    <span class="checkbox-title"><?php print __('Links is active') ?></span>
                 </label>
 
                 <label>
