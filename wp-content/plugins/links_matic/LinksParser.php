@@ -3175,7 +3175,7 @@ class LinksParser extends LinksAbstractDB {
           );
          */
         $ret = array();
-        if (preg_match('/<script[^>]*>([^<]*type":"JobPosting"[^<]+)<\/script>/s', $code, $match)) {
+        if (preg_match('/<script[^>]*>([^<]*type":"JobPosting".*)<\/script>/Us', $code, $match)) {
             $decode = json_decode($match[1], true);
             $rules_fields = $this->parser_rules_fields;
             foreach ($rules_fields as $key => $title) {
