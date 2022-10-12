@@ -2645,7 +2645,8 @@ class LinksParser extends LinksAbstractDB {
                     $content_f = $this->filter_job_type($content_f);
                 } else if ($type == 'jc') {
                     // Get category from options
-                    $content_f = $this->filter_job_type($results['t']['content_f'], 'category');
+                    $job_cat_def = (int) $o['jobcat'];
+                    $content_f = $this->filter_job_type($results['t']['content_f'], 'category', $job_cat_def);
                 } else if ($type == 'dp' || $type == 'de') {
                     // Date logic  
                     $content_f = trim($content_f);
@@ -3349,7 +3350,7 @@ class LinksParser extends LinksAbstractDB {
         }
     }
 
-    public function filter_job_type($content = '', $slug = 'type') {
+    public function filter_job_type($content = '', $slug = 'type', $cat_def = 0) {
         $settings = $this->ml->get_settings();
 
         $found = 0;
@@ -3383,11 +3384,13 @@ class LinksParser extends LinksAbstractDB {
                 }
             }
         }
-        if (!$found) {
-            if ($slug == 'category') {
-                $found = 0;
+        if ($found == 0) {
+            if ($cat_def) {
+                $found = $cat_def;
             } else {
-                $found = $settings['job_type'];
+                if ($slug == 'type') {
+                    $found = $settings['job_type'];
+                }
             }
             $found_key = 'Default';
         }
@@ -3448,14 +3451,7 @@ class LinksParser extends LinksAbstractDB {
         }
 
         // Save taxonomies. 
-        $job_cat = array_keys($results['jc']['content_f']);
-        if (!$job_cat) {
-            // Default category
-            $options = $this->get_options($campaign);
-            $o = $options['links'];
-            $job_cat = (int) $o['jobcat'];
-        }
-        wp_set_object_terms($post_id, $job_cat, 'job_listing_category', false);
+        wp_set_object_terms($post_id, array_keys($results['jc']['content_f']), 'job_listing_category', false);
 
         // Get job type
         wp_set_object_terms($post_id, array_keys($results['jt']['content_f']), 'job_listing_type', false);
