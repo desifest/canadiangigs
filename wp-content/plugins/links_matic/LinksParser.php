@@ -58,6 +58,9 @@ class LinksParser extends LinksAbstractDB {
                     'interval' => 1440,
                     'last_update' => 0,
                     'status' => 0,
+                    'list_type' => 1,
+                    'list_interval' => 1440,
+                    'list_rules' => ''
                 ),
                 'gen_urls' => array(
                     'type' => 'm',
@@ -945,7 +948,7 @@ class LinksParser extends LinksAbstractDB {
             $this->log_info($message, $campaign->id, 0, 1);
         }
 
-        $this->fund_urls_update_progress($campaign);
+        $this->find_urls_update_progress($campaign);
 
         return $count;
     }
@@ -1157,18 +1160,32 @@ class LinksParser extends LinksAbstractDB {
     }
 
     public function cron_urls($campaign, $options, $preview = true) {
-
+        $urls = array();
         $cron_urls = $options['cron_urls'];
 
-        $urls = array();
-        if (isset($cron_urls['page']) && $cron_urls['page'] != '') {
-            $urls[] = htmlspecialchars(base64_decode($cron_urls['page']));
+        $list_type = $cron_urls['list_type'];
+        $list_interval = $cron_urls['list_interval'];
+        if ($list_type == 2) {
+            // List update
+            $rules = $cron_urls['list_rules'];
+            $last_url_id = $this->get_rules_last_url_id($campaign, $rules, $list_interval, $preview);
+            if ($last_url_id) {
+                $urls[] = base64_decode($rules[$last_url_id]['u']);
+            }
+        } else {
+            // Single update
+            if (isset($cron_urls['page']) && $cron_urls['page'] != '') {
+                $urls[] = htmlspecialchars(base64_decode($cron_urls['page']));
+            }
         }
 
-        $reg = isset($cron_urls['match']) ? base64_decode($cron_urls['match']) : '';
-        $wait = 0;
-        $cid = $campaign->id;
-        $ret = $this->parse_urls($cid, $reg, $urls, $wait, $preview);
+        $ret = array();
+        if ($urls) {
+            $reg = isset($cron_urls['match']) ? base64_decode($cron_urls['match']) : '';
+            $wait = 0;
+            $cid = $campaign->id;
+            $ret = $this->parse_urls($cid, $reg, $urls, $wait, $preview);
+        }
         return $ret;
     }
 
@@ -2608,6 +2625,8 @@ class LinksParser extends LinksAbstractDB {
                     $content = $url->link;
                 } else if ($type == 'jt') {
                     $content = 'Default';
+                } else if ($type == 'jc') {
+                    $content = 'Default';
                 }
             }
 
@@ -2624,6 +2643,9 @@ class LinksParser extends LinksAbstractDB {
                 if ($type == 'jt') {
                     // Get type from options
                     $content_f = $this->filter_job_type($content_f);
+                } else if ($type == 'jc') {
+                    // Get category from options
+                    $content_f = $this->filter_job_type($results['t']['content_f'], 'category');
                 } else if ($type == 'dp' || $type == 'de') {
                     // Date logic  
                     $content_f = trim($content_f);
@@ -3188,6 +3210,33 @@ class LinksParser extends LinksAbstractDB {
      * Job category
      */
 
+    public function get_rules_last_url_id($campaign, $rules, $list_interval = 1440, $preview = false) {
+        $min_id = 0;
+        if ($rules) {
+            $curr_time = $this->curr_time();
+            $min_date = $curr_time;
+            foreach ($rules as $rid => $rule) {
+                $date = isset($rule['l']) ? $rule['l'] : 0;
+                $next_interval = $date + ($list_interval * 60);
+
+                if ($curr_time > $next_interval && $date < $min_date) {
+                    $min_date = $date;
+                    $min_id = $rid;
+                }
+            }
+        }
+        if ($min_id && !$preview) {
+            // Update rule date
+            $upd_rule = $rules[$min_id];
+            $upd_rule['l'] = $this->curr_time();
+            $rules[$min_id] = $upd_rule;
+            $options_upd = array();
+            $options_upd['cron_urls']['list_rules'] = $rules;
+            $this->update_campaign_options($campaign->id, $options_upd);
+        }
+        return $min_id;
+    }
+
     public function get_data_job_api($code) {
         /*
           public $parser_rules_fields = array(
@@ -3281,7 +3330,7 @@ class LinksParser extends LinksAbstractDB {
         return $terms;
     }
 
-    public function job_types_form($terms, $job_type_alias = '') {
+    public function job_types_form($terms, $job_type_alias = '', $slug = 'type') {
         $alias_arr = array();
         if ($job_type_alias) {
             $alias_arr = unserialize($job_type_alias);
@@ -3295,17 +3344,21 @@ class LinksParser extends LinksAbstractDB {
             $value = isset($alias_arr[$key]) ? htmlspecialchars(base64_decode($alias_arr[$key])) : '';
             ?>
             <p><?php print $name ?></p>
-            <textarea name="job_type_alias_<?php print $key ?>" style="width:90%" rows="3"><?php print $value; ?></textarea>                               
+            <textarea name="job_<?php print $slug ?>_alias_<?php print $key ?>" style="width:90%" rows="3"><?php print $value; ?></textarea>                               
             <?php
         }
     }
 
-    public function filter_job_type($content = '') {
+    public function filter_job_type($content = '', $slug = 'type') {
         $settings = $this->ml->get_settings();
 
         $found = 0;
         $found_key = '';
-        $job_type_alias = $settings['job_type_alias'];
+        $type_name = 'job_type_alias';
+        if ($slug == 'category') {
+            $type_name = 'job_category_alias';
+        }
+        $job_type_alias = $settings[$type_name];
         $alias_arr = array();
         if ($job_type_alias) {
             $alias_arr = unserialize($job_type_alias);
@@ -3331,7 +3384,11 @@ class LinksParser extends LinksAbstractDB {
             }
         }
         if (!$found) {
-            $found = $settings['job_type'];
+            if ($slug == 'category') {
+                $found = 0;
+            } else {
+                $found = $settings['job_type'];
+            }
             $found_key = 'Default';
         }
         return array($found => $found_key);
@@ -3390,11 +3447,15 @@ class LinksParser extends LinksAbstractDB {
             }
         }
 
-        // Save taxonomies. Default category
-        $options = $this->get_options($campaign);
-        $o = $options['links'];
-        $categories = (int) $o['jobcat'];
-        wp_set_object_terms($post_id, $categories, 'job_listing_category', false);
+        // Save taxonomies. 
+        $job_cat = array_keys($results['jc']['content_f']);
+        if (!$job_cat) {
+            // Default category
+            $options = $this->get_options($campaign);
+            $o = $options['links'];
+            $job_cat = (int) $o['jobcat'];
+        }
+        wp_set_object_terms($post_id, $job_cat, 'job_listing_category', false);
 
         // Get job type
         wp_set_object_terms($post_id, array_keys($results['jt']['content_f']), 'job_listing_type', false);

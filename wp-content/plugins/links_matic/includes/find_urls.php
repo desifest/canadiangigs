@@ -264,18 +264,58 @@ if ($cid) {
                             <span class="inline-edit"><?php print __('The parser update interval') ?></span>                    
                         </label>
 
-                        <label>
-                            <span class="title"><?php print __('Page') ?></span>
-                            <span class="input-text-wrap"><input type="text" name="page" placeholder="Example: https://example.com/AutorName" class="title" value="<?php print htmlspecialchars(base64_decode($cron_urls['page'])) ?>"></span>
+                        <label class="inline-edit-interval">
+                            <span class="title"><?php print __('List type') ?></span>
+                            <select name="list_type" class="interval">
+                                <?php
+                                $list_type = $cron_urls['list_type'];
+                                foreach ($this->list_type as $key => $name) {
+                                    $selected = ($key == $list_type) ? 'selected' : '';
+                                    ?>
+                                    <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>                                
+                                    <?php
+                                }
+                                ?>                          
+                            </select> 
+                            <span class="inline-edit"><?php print __('One URL or multi.') ?></span>                    
                         </label>
-
+                        <?php if ($list_type == 2) { ?>
+                            <label class="inline-edit-interval">
+                                <span class="title"><?php print __('List update') ?></span>
+                                <select name="list_interval" class="interval">
+                                    <?php
+                                    $inetrval = $cron_urls['list_interval'];
+                                    foreach ($this->parser_interval as $key => $name) {
+                                        $selected = ($key == $inetrval) ? 'selected' : '';
+                                        ?>
+                                        <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>                                
+                                        <?php
+                                    }
+                                    ?>                          
+                                </select> 
+                                <span class="inline-edit"><?php print __('Update interval for one list item') ?></span>                    
+                            </label>
+                        <?php } ?>
                         <label>
                             <span class="title"><?php print __('Match reg') ?></span>
                             <span class="input-text-wrap"><input type="text" name="match" placeholder="<?php print htmlspecialchars('Example: /<a[^>]+href="([^"]+)"[^>]*>Read More<\/a>/'); ?>" value="<?php print htmlspecialchars(base64_decode($cron_urls['match'])) ?>"></span>
                         </label>
+                        <br />
+                        <?php
+                        if ($list_type == 2) {
+                            $rules = $cron_urls['list_rules'];
+                            $this->show_list_rules($rules, true);
+                        } else {
+                            ?>
+                            <label>
+                                <span class="title"><?php print __('Page') ?></span>
+                                <span class="input-text-wrap"><input type="text" name="page" placeholder="Example: https://example.com/AutorName" class="title" value="<?php print htmlspecialchars(base64_decode($cron_urls['page'])) ?>"></span>
+                            </label>
+                        <?php } ?>
+
 
                         <label class="inline-edit-status">                
-                            <input type="checkbox" name="cron_preview" value="1" checked="checked">
+                            <input type="checkbox" name="cron_preview" value="1">
                             <span class="checkbox-title"><?php print __('Preview') ?></span>
                         </label>
                         <br />
@@ -325,167 +365,167 @@ if ($cid) {
             </div>
         </form>
     <?php endif; ?>
-     <?php /*
-    <br />
-    <hr />
-    <h2>Generate URLs from ZR database</h2>
+    <?php /*
+      <br />
+      <hr />
+      <h2>Generate URLs from ZR database</h2>
 
-    <form accept-charset="UTF-8" method="post" id="generate_urls">
+      <form accept-charset="UTF-8" method="post" id="generate_urls">
 
-        <div class="cm-edit inline-edit-row">
-            <fieldset>              
-                <?php
-                $gen_urls = $options['gen_urls'];
-                ?>
-                <input type="hidden" name="generate_urls" value="1">
-                <input type="hidden" name="id" class="id" value="<?php print $campaign->id ?>">                 
-                <?php wp_nonce_field('ml-nonce', 'ml-nonce'); ?>
-                <p><b>Cron update settings</b></p>
-                <label class="inline-edit-status">                
-                    <?php
-                    $checked = '';
-                    if ($gen_urls['status'] == 1) {
-                        $checked = 'checked="checked"';
-                    }
-                    ?>
-                    <input type="checkbox" name="status" value="1" <?php print $checked ?> >
-                    <span class="checkbox-title"><?php print __('Cron automatically generates new URLs is active') ?></span>
-                </label>
-                <label class="inline-edit-interval"> 
-                    <span class="title"><?php print __('URLs count') ?></span>         
-                    <?php
-                    $parse_num = $gen_urls['num'];
-                    $previews_number = $this->gen_urls_number;
-                    ?>
-                    <select name="num" class="interval">
-                        <?php
-                        foreach ($previews_number as $key => $name) {
-                            $selected = ($key == $parse_num) ? 'selected' : '';
-                            ?>
-                            <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>                                
-                            <?php
-                        }
-                        ?>                          
-                    </select>                     
-                    <span class="inline-edit"><?php print __('Number of URLs for cron parsing') ?></span> 
-                </label>
-                <label class="inline-edit-interval">
-                    <span class="title"><?php print __('Update') ?></span>
-                    <select name="interval" class="interval">
-                        <?php
-                        $inetrval = $gen_urls['interval'];
-                        foreach ($this->parser_interval as $key => $name) {
-                            $selected = ($key == $inetrval) ? 'selected' : '';
-                            ?>
-                            <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>                                
-                            <?php
-                        }
-                        ?>                          
-                    </select> 
-                    <span class="inline-edit"><?php print __('The cron update interval') ?></span>                    
-                </label>
-                <label>
-                    <span class="title"><?php print __('Last Id') ?></span>
-                    <span class="input-text-wrap"><input type="text" name="last_id" value="<?php print $gen_urls['last_id'] ?>" disabled="disabled"></span>
-                </label>
+      <div class="cm-edit inline-edit-row">
+      <fieldset>
+      <?php
+      $gen_urls = $options['gen_urls'];
+      ?>
+      <input type="hidden" name="generate_urls" value="1">
+      <input type="hidden" name="id" class="id" value="<?php print $campaign->id ?>">
+      <?php wp_nonce_field('ml-nonce', 'ml-nonce'); ?>
+      <p><b>Cron update settings</b></p>
+      <label class="inline-edit-status">
+      <?php
+      $checked = '';
+      if ($gen_urls['status'] == 1) {
+      $checked = 'checked="checked"';
+      }
+      ?>
+      <input type="checkbox" name="status" value="1" <?php print $checked ?> >
+      <span class="checkbox-title"><?php print __('Cron automatically generates new URLs is active') ?></span>
+      </label>
+      <label class="inline-edit-interval">
+      <span class="title"><?php print __('URLs count') ?></span>
+      <?php
+      $parse_num = $gen_urls['num'];
+      $previews_number = $this->gen_urls_number;
+      ?>
+      <select name="num" class="interval">
+      <?php
+      foreach ($previews_number as $key => $name) {
+      $selected = ($key == $parse_num) ? 'selected' : '';
+      ?>
+      <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>
+      <?php
+      }
+      ?>
+      </select>
+      <span class="inline-edit"><?php print __('Number of URLs for cron parsing') ?></span>
+      </label>
+      <label class="inline-edit-interval">
+      <span class="title"><?php print __('Update') ?></span>
+      <select name="interval" class="interval">
+      <?php
+      $inetrval = $gen_urls['interval'];
+      foreach ($this->parser_interval as $key => $name) {
+      $selected = ($key == $inetrval) ? 'selected' : '';
+      ?>
+      <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $name ?></option>
+      <?php
+      }
+      ?>
+      </select>
+      <span class="inline-edit"><?php print __('The cron update interval') ?></span>
+      </label>
+      <label>
+      <span class="title"><?php print __('Last Id') ?></span>
+      <span class="input-text-wrap"><input type="text" name="last_id" value="<?php print $gen_urls['last_id'] ?>" disabled="disabled"></span>
+      </label>
 
-                <label class="inline-edit-status">                                
-                    <input type="checkbox" name="reset" value="1" >
-                    <span class="checkbox-title"><?php print __('Reset last Id') ?></span>
-                </label>
-                <br />
+      <label class="inline-edit-status">
+      <input type="checkbox" name="reset" value="1" >
+      <span class="checkbox-title"><?php print __('Reset last Id') ?></span>
+      </label>
+      <br />
 
-                <h2>Generate URLs settings</h2>
+      <h2>Generate URLs settings</h2>
 
-                <label class="inline-edit-interval">
-                    <span class="title"><?php print __('Data type') ?></span>
-                    <select name="type" class="interval">
-                        <?php
-                        if ($campaign->type == 1) {
-                            // Actors
-                            foreach ($this->rwt_actor_type as $key => $value) {
-                                $selected = ($key == $gen_urls['type']) ? 'selected' : '';
-                                ?>
-                                <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $value ?></option>                                
-                                <?php
-                            }
-                        } else {
-                            // Movies
-                            foreach ($this->rwt_movie_type as $key => $value) {
-                                $selected = ($key == $gen_urls['type']) ? 'selected' : '';
-                                ?>
-                                <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $value ?></option>                                
-                                <?php
-                            }
-                        }
-                        ?>                          
-                    </select> 
-                    <span class="inline-edit"><?php print __('Select the data source from which the addresses will be generated.') ?></span>                    
-                </label>
+      <label class="inline-edit-interval">
+      <span class="title"><?php print __('Data type') ?></span>
+      <select name="type" class="interval">
+      <?php
+      if ($campaign->type == 1) {
+      // Actors
+      foreach ($this->rwt_actor_type as $key => $value) {
+      $selected = ($key == $gen_urls['type']) ? 'selected' : '';
+      ?>
+      <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $value ?></option>
+      <?php
+      }
+      } else {
+      // Movies
+      foreach ($this->rwt_movie_type as $key => $value) {
+      $selected = ($key == $gen_urls['type']) ? 'selected' : '';
+      ?>
+      <option value="<?php print $key ?>" <?php print $selected ?> ><?php print $value ?></option>
+      <?php
+      }
+      }
+      ?>
+      </select>
+      <span class="inline-edit"><?php print __('Select the data source from which the addresses will be generated.') ?></span>
+      </label>
 
-                <label>
-                    <span class="title"><?php print __('Page') ?></span>
-                    <span class="input-text-wrap"><input type="text" name="page" placeholder="Example: https://example.com/api?query={title}" value="<?php print htmlspecialchars(base64_decode($gen_urls['page'])) ?>"></span>
-                </label>
-                <label>
-                    <span class="title"><?php print __('Regexp') ?></span>
-                    <span class="input-text-wrap"><input type="text" name="regexp" placeholder="<?php print htmlspecialchars('Example: /<a[^>]+href="([^"]+)"[^>]*>Read More<\/a>/; $1'); ?>" value="<?php print htmlspecialchars(base64_decode($gen_urls['regexp'])) ?>"></span>
-                </label>
+      <label>
+      <span class="title"><?php print __('Page') ?></span>
+      <span class="input-text-wrap"><input type="text" name="page" placeholder="Example: https://example.com/api?query={title}" value="<?php print htmlspecialchars(base64_decode($gen_urls['page'])) ?>"></span>
+      </label>
+      <label>
+      <span class="title"><?php print __('Regexp') ?></span>
+      <span class="input-text-wrap"><input type="text" name="regexp" placeholder="<?php print htmlspecialchars('Example: /<a[^>]+href="([^"]+)"[^>]*>Read More<\/a>/; $1'); ?>" value="<?php print htmlspecialchars(base64_decode($gen_urls['regexp'])) ?>"></span>
+      </label>
 
-                <h3>Templates from the database</h3>
-                <?php
-                if ($campaign->type == 1) {
-                    // Actors tpl
-                    $tpl_data = $this->get_actors_templates();
-                } else {
-                    // Movies tpl
-                    $tpl_data = $this->get_name_templates();
-                }
-                if ($tpl_data) {
-                    ?>
-                    <table class="wp-list-table widefat striped table-view-list">
-                        <thead>
-                            <tr>
-                                <th><?php print __('Name') ?></th>                
-                                <th><?php print __('Value example') ?></th>    
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($tpl_data as $key => $value) { ?>
-                                <tr>
-                                    <td><?php print $key ?></td>
-                                    <td><?php print $value ?></td>
-                                </tr>
-                            <?php } ?>
-                        </tbody>        
-                    </table>
-                    <?php
-                }
-                ?>
+      <h3>Templates from the database</h3>
+      <?php
+      if ($campaign->type == 1) {
+      // Actors tpl
+      $tpl_data = $this->get_actors_templates();
+      } else {
+      // Movies tpl
+      $tpl_data = $this->get_name_templates();
+      }
+      if ($tpl_data) {
+      ?>
+      <table class="wp-list-table widefat striped table-view-list">
+      <thead>
+      <tr>
+      <th><?php print __('Name') ?></th>
+      <th><?php print __('Value example') ?></th>
+      </tr>
+      </thead>
+      <tbody>
+      <?php foreach ($tpl_data as $key => $value) { ?>
+      <tr>
+      <td><?php print $key ?></td>
+      <td><?php print $value ?></td>
+      </tr>
+      <?php } ?>
+      </tbody>
+      </table>
+      <?php
+      }
+      ?>
 
-                <label class="inline-edit-status">                
-                    <input type="checkbox" name="preview" value="1" checked="checked">
-                    <span class="checkbox-title"><?php print __('Preview first page') ?></span>
-                </label>
+      <label class="inline-edit-status">
+      <input type="checkbox" name="preview" value="1" checked="checked">
+      <span class="checkbox-title"><?php print __('Preview first page') ?></span>
+      </label>
 
-                <br />
-                <input type="submit" name="options" id="edit-submit" value="<?php echo __('Save settings') ?>" class="button-primary">  
-                <a target="_blank" href="<?php print $url ?>&cid=<?php print $cid ?>&gen_urls=1" class="button-secondary">Generate URLs</a>   
-            </fieldset>
-        </div>
-    </form>
+      <br />
+      <input type="submit" name="options" id="edit-submit" value="<?php echo __('Save settings') ?>" class="button-primary">
+      <a target="_blank" href="<?php print $url ?>&cid=<?php print $cid ?>&gen_urls=1" class="button-secondary">Generate URLs</a>
+      </fieldset>
+      </div>
+      </form>
 
-    <?php if ($preview_gen_data) { ?>
+      <?php if ($preview_gen_data) { ?>
 
-        <h3>Preview Generate URLs</h3>
-        <p>URL: <?php print $preview_gen_data['url'] ?></p>
-        <h2>Headers</h2>
-        <textarea style="width: 90%; height: 300px;"><?php print $preview_gen_data['headers'] ?></textarea>        
-        <h2>Content</h2>
-        <textarea style="width: 90%; height: 300px;"><?php print htmlspecialchars($preview_gen_data['content']) ?></textarea>      
+      <h3>Preview Generate URLs</h3>
+      <p>URL: <?php print $preview_gen_data['url'] ?></p>
+      <h2>Headers</h2>
+      <textarea style="width: 90%; height: 300px;"><?php print $preview_gen_data['headers'] ?></textarea>
+      <h2>Content</h2>
+      <textarea style="width: 90%; height: 300px;"><?php print htmlspecialchars($preview_gen_data['content']) ?></textarea>
 
-    <?php } ?>
+      <?php } ?>
 
-*/ ?>
+     */ ?>
 
 <?php } ?>

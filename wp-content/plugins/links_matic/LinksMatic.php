@@ -29,6 +29,7 @@ class LinksMatic extends LinksAbstractDB {
             'tor_ip_d' => 1000,
             'job_type' => 3,
             'job_type_alias' => '',
+            'job_category_alias' => '',
             'job_expired' => 30,
         );
 
@@ -221,6 +222,16 @@ class LinksMatic extends LinksAbstractDB {
                 }
             }
             $ss['job_type_alias'] = serialize($alias_arr);
+
+            // Update job category
+            $alias_arr = array();
+            foreach ($form as $key => $value) {
+                if (strstr($key, 'job_category_alias_')) {
+                    $new_key = str_replace('job_category_alias_', '', $key);
+                    $alias_arr[$new_key] = base64_encode($value);
+                }
+            }
+            $ss['job_category_alias'] = serialize($alias_arr);
         }
 
         // Upadate cookie content

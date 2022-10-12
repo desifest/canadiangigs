@@ -1,9 +1,15 @@
-<h2><a href="<?php print $url ?>"><?php print __('Links Matic') ?></a>. <?php print __('Settings job') ?></h2>
+<h2><a href="<?php print $url ?>"><?php print __('Links Matic') ?></a>. <?php print __('Settings job type') ?></h2>
 <?php print $tabs; ?>
 
 <form accept-charset="UTF-8" method="post" id="tag">
     <div class="cm-edit">
         <fieldset>    
+            <div class="label">
+                <?php print __('Job expired days') ?>
+            </div>
+            <input type="text" name="job_expired" class="title" value="<?php print $ss['job_expired'] ?>" style="width:90%">
+            <br /><br />
+            <h2>Job Type</h2>
             <?php
             // Categories
             $job_listing_category = $this->mp->job_listing_type();
@@ -25,11 +31,7 @@
                 <span class="inline-edit"><?php print __('Default job type. If input data is empty') ?></span> 
             </label>
             <br /><br />
-            <div class="label">
-                <?php print __('Job expired days') ?>
-            </div>
-            <input type="text" name="job_expired" class="title" value="<?php print $ss['job_expired'] ?>" style="width:90%">
-            <br /><br />
+
 
 
             <h2>Job type alias keys</h2>
@@ -38,9 +40,18 @@
             $this->mp->job_types_form($job_listing_category, $ss['job_type_alias']);
             ?>
 
+
+            <h2>Job category alias keys</h2>
+            <p>Enter coma separated alias for job types.</p>
+            <?php
+            $job_listing_category = $this->mp->job_listing_category();
+            $this->mp->job_types_form($job_listing_category, $ss['job_category_alias'], 'category');
+            ?>
+
             <?php wp_nonce_field('ml-nonce', 'ml-nonce'); ?>
             <br />
             <input type="submit" name="options" id="edit-submit" value="<?php echo __('Save') ?>" class="button-primary">  
+
 
         </fieldset>
     </div>

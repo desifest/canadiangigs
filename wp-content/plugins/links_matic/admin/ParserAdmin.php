@@ -118,7 +118,7 @@ class ParserAdmin extends ItemAdmin {
     public $post_status = array(
         1 => 'Publish',
         0 => 'Draft',
-        2 => 'Trash'         
+        2 => 'Trash'
     );
     public $url_status = array(
         0 => 'New',
@@ -173,6 +173,10 @@ class ParserAdmin extends ItemAdmin {
         0 => 'Tor and Proxy',
         1 => 'Tor',
         2 => 'Proxy',
+    );
+    public $list_type = array(
+        1 => 'One URL',
+        2 => 'Multi URL',
     );
 
     /* Generate urls */
@@ -905,7 +909,7 @@ class ParserAdmin extends ItemAdmin {
 
             if ($form_state['edit_parsing_options']) {
                 $add_result['status'] = isset($form_state['status']) ? $form_state['status'] : 0;
-                $add_result['jobapi'] = isset($form_state['jobapi']) ? $form_state['jobapi'] : 0;                
+                $add_result['jobapi'] = isset($form_state['jobapi']) ? $form_state['jobapi'] : 0;
             } else if ($form_state['edit_parsing_data']) {
                 // Rules logic
                 $add_result['rules'] = $this->parser_rules_form($form_state);
@@ -2093,7 +2097,6 @@ class ParserAdmin extends ItemAdmin {
             ?>
             <h3>Job links result:</h3>
             <?php
-
             foreach ($preivew_data as $id => $item) {
 
                 $post = $item['post'];
@@ -2109,8 +2112,8 @@ class ParserAdmin extends ItemAdmin {
                 }
                 ?>
                 <p class="table-view-list">Total match: <?php print $fields['total_match'] ?>; Total rating: <?php print $fields['total_rating'] ?>; 
-                    Valid: <?php print $fields['valid']?'<b class="green">True</b>':'<b class="red">False</b>' ?><br />
-                    Post hash: <?php print $fields['post_hash']?>. Hash valid: <?php print $fields['hash_valid']?'<b class="green">True</b>':'<b class="red">False</b>' ?>
+                    Valid: <?php print $fields['valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?><br />
+                    Post hash: <?php print $fields['post_hash'] ?>. Hash valid: <?php print $fields['hash_valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?>
                 </p>
                 <table class="wp-list-table widefat striped table-view-list">
                     <thead>
@@ -2140,6 +2143,159 @@ class ParserAdmin extends ItemAdmin {
             <p>Check regexp rules.</p>
             <?php
         }
+    }
+
+    /*
+     * Find URLs rules
+     */
+
+    public function show_list_rules($rules = array(), $edit = true) {
+        if ($rules || $edit) {
+            if (!is_array($rules)) {
+                $rules = array();
+            }
+
+            $disabled = '';
+            if (!$edit) {
+                $disabled = ' disabled ';
+                $title = __('URLs list');
+                ?>
+                <h2><?php print $title ?></h2>            
+            <?php } ?>
+            <table id="rules" class="wp-list-table widefat striped table-view-list">
+                <thead>
+                    <tr>
+                        <th><?php print __('Id') ?></th>
+                        <th><?php print __('URL') ?></th>
+                        <th><?php print __('Comment') ?></th>
+                        <th><?php print __('Last Update') ?></th>                  
+                        <th><?php print __('Active') ?></th>
+                        <?php if ($edit): ?>
+                            <th><?php print __('Remove') ?></th> 
+                        <?php endif ?>                        
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($rules) { ?>
+                        <?php foreach ($rules as $rid => $rule) {
+                            ?>
+                            <tr>
+                                <td>
+                                    <?php print $rid ?>
+                                    <input type="hidden" name="rule_url_id_<?php print $rid ?>" value="<?php print $rid ?>">
+                                </td>                                
+                                <td>
+                                    <input type="text" name="rule_url_u_<?php print $rid ?>" class="rule_m" value="<?php print htmlspecialchars(base64_decode($rule['u'])) ?>"<?php print $disabled ?>>
+                                </td>
+                                <td>
+                                    <input type="text" name="rule_url_c_<?php print $rid ?>" class="rule_m" value="<?php print $rule['c'] ?>"<?php print $disabled ?>>
+                                </td>
+                                <td>    
+                                    <?php
+                                    $last_update_text = 'Never';
+                                    if ($rule['l']) {
+                                        $last_update_text = date('d.m.Y H:i:s', (int) $rule['l']);
+                                    }
+                                    ?>
+                                    <?php print $last_update_text ?>
+                                </td>
+                                <td>
+                                    <?php
+                                    $checked = '';
+                                    $active = isset($rule['a']) ? $rule['a'] : '';
+                                    if ($active) {
+                                        $checked = 'checked="checked"';
+                                    }
+                                    ?>
+                                    <input type="checkbox" name="rule_url_a_<?php print $rid ?>" value="1" <?php print $checked ?> <?php print $disabled ?>>                                    
+                                </td>
+
+                                <?php if ($edit): ?>
+                                    <td>
+                                        <input type="checkbox" name="remove_url_rule[]" value="<?php print $rid ?>">
+                                    </td>
+                                <?php endif ?>                                
+                            </tr> 
+                        <?php } ?>
+                        <?php
+                    }
+                    if ($edit) {
+                        ?>
+                        <tr>                            
+                            <td colspan="12"><b><?php print __('Add a new URL') ?></b></td>        
+                        </tr>
+                        <tr>
+                            <td></td>                            
+                            <td>
+                                <input type="text" name="url_new_rule_u" class="rule_m" value="" placeholder="Enter a URL">                                
+                            </td> 
+                            <td>
+                                <input type="text" name="url_new_rule_c" class="rule_m" value="" placeholder="Comment">
+                            </td>
+                            <td></td> 
+                            <td>
+                                <input type="checkbox" name="url_new_rule_a" value="1" checked="checked">
+                            </td>
+                            <td></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>    <?php
+        }
+    }
+
+    private function list_rules_form($form_state) {
+        $rule_exists = array();
+
+        $to_remove = isset($form_state['remove_url_rule']) ? $form_state['remove_url_rule'] : array();
+        $rule_keys = array('a', 'u', 'c');
+        // Exists rules
+        foreach ($form_state as $name => $value) {
+            if (strstr($name, 'rule_url_id_')) {
+                $key = $value;
+                if (in_array($key, $to_remove)) {
+                    continue;
+                }
+                $upd_rule = array();
+                foreach ($rule_keys as $k) {
+                    $form_name = 'rule_url_' . $k . '_' . $key;
+                    $form_value = isset($form_state[$form_name]) ? $form_state[$form_name] : '';
+                    if ($k == 'u') {
+                        //Regexp encode
+                        $form_value = base64_encode(stripslashes($form_value));
+                    }
+                    $upd_rule[$k] = $form_value;
+                }
+
+                $rule_exists[$key] = $upd_rule;
+            }
+        }
+
+        // New rule
+        if ($form_state['url_new_rule_u']) {
+
+            $old_key = 0;
+            if ($rule_exists) {
+                krsort($rule_exists);
+                $old_key = array_key_first($rule_exists);
+            }
+            $new_rule_key = $old_key + 1;
+            foreach ($rule_keys as $k) {
+                $form_name = 'url_new_rule_' . $k;
+                $form_value = isset($form_state[$form_name]) ? $form_state[$form_name] : $this->mp->get_def_parser_rule($k);
+                if ($k == 'u') {
+                    //Regexp encode
+                    $form_value = base64_encode(stripslashes($form_value));
+                }
+                $new_rule[$k] = $form_value;
+            }
+
+            $rule_exists[$new_rule_key] = $new_rule;
+        }
+
+        ksort($rule_exists);
+
+        return $rule_exists;
     }
 
     /*
@@ -2594,6 +2750,10 @@ class ParserAdmin extends ItemAdmin {
                 foreach ($checkbox_fields as $field) {
                     $urls[$field] = isset($form_state[$field]) ? $form_state[$field] : 0;
                 }
+
+                // Rules logic
+                $urls['list_rules'] = $this->list_rules_form($form_state);
+
 
                 $options = $opt_prev;
                 $options['cron_urls'] = $urls;
