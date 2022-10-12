@@ -118,7 +118,7 @@ class ParserAdmin extends ItemAdmin {
     public $post_status = array(
         1 => 'Publish',
         0 => 'Draft',
-        2 => 'Trash'
+        2 => 'Trash'         
     );
     public $url_status = array(
         0 => 'New',
@@ -161,6 +161,7 @@ class ParserAdmin extends ItemAdmin {
         0 => 'New',
         1 => 'Done',
         2 => 'Error',
+        3 => 'Already Exist',
     );
     public $parse_mode = array(
         0 => 'Curl',
@@ -2107,7 +2108,10 @@ class ParserAdmin extends ItemAdmin {
                     continue;
                 }
                 ?>
-                <p class="table-view-list">Total match: <?php print $fields['total_match'] ?>; Total rating: <?php print $fields['total_rating'] ?>; Valid: <?php print $fields['valid']?'<b class="green">True</b>':'<b class="red">False</b>' ?></p>
+                <p class="table-view-list">Total match: <?php print $fields['total_match'] ?>; Total rating: <?php print $fields['total_rating'] ?>; 
+                    Valid: <?php print $fields['valid']?'<b class="green">True</b>':'<b class="red">False</b>' ?><br />
+                    Post hash: <?php print $fields['post_hash']?>. Hash valid: <?php print $fields['hash_valid']?'<b class="green">True</b>':'<b class="red">False</b>' ?>
+                </p>
                 <table class="wp-list-table widefat striped table-view-list">
                     <thead>
                         <tr>

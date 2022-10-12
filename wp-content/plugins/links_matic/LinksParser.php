@@ -2669,10 +2669,32 @@ class LinksParser extends LinksAbstractDB {
         }
 
 
+
+        // Check post hash
+        $hash_valid = false;
+        $hash_fields = array('t', 'cn', 'loc');
+        $hash_data = array();
+        foreach ($hash_fields as $field) {
+            if ($results[$field]['content_f']) {
+                $hash_data[] = $results[$field]['content_f'];
+            }
+        }
+        $post_hash = '';
+
+        if ($hash_data) {
+            $post_hash = md5(implode('-', $hash_data));
+            if (!$this->get_post_by_hash($post_hash)) {
+                $hash_valid = true;
+            }
+        }
+
+
         $fields = array(
             'total_rating' => $total_rating,
             'total_match' => $total_match,
-            'valid' => $valid
+            'valid' => $valid,
+            'post_hash' => $post_hash,
+            'hash_valid' => $hash_valid
         );
 
         return array('fields' => $fields, 'results' => $results);
@@ -2922,8 +2944,19 @@ class LinksParser extends LinksAbstractDB {
         $this->db_query($sql);
     }
 
+    public function update_post_fields($data = array(), $id) {
+        $data['last_upd'] = $this->curr_time();
+        $this->db_update($data, $this->db['posts'], $id);
+    }
+
     public function get_post_by_uid($uid) {
         $sql = sprintf("SELECT * FROM {$this->db['posts']} WHERE uid = %d", (int) $uid);
+        $result = $this->db_fetch_row($sql);
+        return $result;
+    }
+
+    public function get_post_by_hash($hash) {
+        $sql = sprintf("SELECT * FROM {$this->db['posts']} WHERE post_hash = '%s'", $hash);
         $result = $this->db_fetch_row($sql);
         return $result;
     }

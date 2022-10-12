@@ -179,7 +179,9 @@ function links_matic_plugin_activation() {
     Pdo_wp::db_query($sql);
     links_matic_create_index(array('status_links'), 'links_matic_posts');
 
-
+    $sql = "ALTER TABLE `links_matic_posts` ADD `post_hash` varchar(255) NOT NULL default ''";
+    Pdo_wp::db_query($sql);
+    links_matic_create_index(array('post_hash'), 'links_matic_posts');
 
     /*
      * Tor

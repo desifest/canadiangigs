@@ -134,34 +134,23 @@ if ($uid) {
                         }
                         ?></td>
                 </tr>
-                <?php /* if ($campaign->type == 1) { ?>
-                  <tr>
-                  <td><?php print __('Actors meta') ?></td>
-                  <td><?php
-                  $meta = $this->mp->get_post_actor_meta(0, $post->id, $campaign->id);
-                  if ($meta){
-                  $actors=array();
-                  foreach ($meta as $item) {
-                  $actors[]=$item->aid;
-                  }
-                  print implode(',', $actors);
-                  }
-                  ?>
-                  </td>
-                  </tr>
-                  <?php } */ ?>
+
                 <tr>
                     <td><?php print __('Rating') ?></td>
                     <td><?php print $post->rating ?></td>
+                </tr>
+                <tr>
+                    <td><?php print __('Post hash') ?></td>
+                    <td><?php print $post->post_hash ?></td>
                 </tr>
             </tbody>        
         </table>
         <?php
         /*
-        $options = $this->mp->get_options($campaign);
-        $o = $options['links'];
-        $preivew_data = $this->mp->find_posts_links(array($post), $o, $campaign->type == 1);
-        $this->preview_links_search($preivew_data);*/
+          $options = $this->mp->get_options($campaign);
+          $o = $options['links'];
+          $preivew_data = $this->mp->find_posts_links(array($post), $o, $campaign->type == 1);
+          $this->preview_links_search($preivew_data); */
         ?>
 
     <?php } ?>

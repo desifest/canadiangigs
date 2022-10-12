@@ -440,26 +440,38 @@ class LinksParserCron extends LinksAbstractDB {
                 $results = $item['results'];
 
                 if ($results) {
+                    if (!$fields['hash_valid']) {
+                        $this->mp->update_post_status($post->uid, 3);
+                        $message = 'The post already exist';
+                        $this->mp->log_warn($message, $cid, $post->uid, 4);
+                    } else {
 
-                    if ($fields['valid']) {
-                        // Add post
-                        $status = 1;
-                        $rating = $fields['total_rating'];
+                        if ($fields['valid']) {
+                            // Add post
+                            $status = 1;
+                            $rating = $fields['total_rating'];
 
-                        $top_movie = $this->mp->add_job_post($campaign, $post, $results);
-                        if ($top_movie > 0) {
-                            $this->mp->update_post_top_movie($post->uid, $status, $top_movie, $rating);
-                            $message = "Add job: title: " . $post->title . "; jid: $top_movie; rating: $rating";
-                            $this->mp->log_info($message, $cid, $post->uid, 4);
+                            $top_movie = $this->mp->add_job_post($campaign, $post, $results);
+                            if ($top_movie > 0) {
+                                $data = array(
+                                    'status_links' => $status,
+                                    'top_movie' => $top_movie,
+                                    'rating' => $rating,             
+                                    'post_hash' => $fields['post_hash'],  
+                                );
+                                $this->mp->update_post_fields($data, $pid);
+                                $message = "Add job: title: " . $post->title . "; jid: $top_movie; rating: $rating";
+                                $this->mp->log_info($message, $cid, $post->uid, 4);
+                            } else {
+                                $this->mp->update_post_status($post->uid, 2);
+                                $message = 'Can not add job post';
+                                $this->mp->log_error($message, $cid, $post->uid, 4);
+                            }
                         } else {
                             $this->mp->update_post_status($post->uid, 2);
-                            $message = 'Can not add job post';
-                            $this->mp->log_error($message, $cid, $post->uid, 4);
+                            $message = 'The post is not valid';
+                            $this->mp->log_warn($message, $cid, $post->uid, 4);
                         }
-                    } else {
-                        $this->mp->update_post_status($post->uid, 2);
-                        $message = 'The post is not valid';
-                        $this->mp->log_warn($message, $cid, $post->uid, 4);
                     }
                 } else {
                     // Link post not found
