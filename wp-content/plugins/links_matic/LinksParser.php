@@ -3308,6 +3308,7 @@ class LinksParser extends LinksAbstractDB {
                             $adr_arr = $adress;
                         }
 
+                        $regions = array();
                         foreach ($adr_arr as $adr) {
                             if (isset($adr['addressLocality']) && trim($adr['addressLocality'])) {
                                 $loc[] = trim($adr['addressLocality']);
@@ -3316,9 +3317,11 @@ class LinksParser extends LinksAbstractDB {
                                 $loc[] = trim($adr['addressRegion']);
                             }
                             if ($loc) {
-                                $ret[$key] = implode(', ', $loc);
+                                $regions[]= implode(', ', $loc);
                             }
                         }
+                        
+                        $ret[$key] = implode('; ', $regions);
                     }
                 } else if ($key == 'cn') {
                     $ret[$key] = isset($decode['hiringOrganization']['name']) ? $decode['hiringOrganization']['name'] : '';
