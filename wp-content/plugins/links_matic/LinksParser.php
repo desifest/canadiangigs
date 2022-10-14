@@ -3321,7 +3321,8 @@ class LinksParser extends LinksAbstractDB {
                             }
                         }
                         
-                        $ret[$key] = implode('; ', $regions);
+                        // $ret[$key] = implode('; ', $regions);
+                        $ret[$key] = array_pop($regions);
                     }
                 } else if ($key == 'cn') {
                     $ret[$key] = isset($decode['hiringOrganization']['name']) ? $decode['hiringOrganization']['name'] : '';
