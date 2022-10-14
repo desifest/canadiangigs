@@ -3260,6 +3260,10 @@ class LinksParser extends LinksAbstractDB {
         $ret = array();
         if (preg_match('/<script[^>]*>([^<]*type":"JobPosting".*)<\/script>/Us', $code, $match)) {
             $decode = json_decode($match[1], true);
+            /*print '<pre>';
+            print_r($decode);
+            print '</pre>';*/
+
             $rules_fields = $this->parser_rules_fields;
             foreach ($rules_fields as $key => $title) {
                 if ($key == 't') {
@@ -3295,16 +3299,25 @@ class LinksParser extends LinksAbstractDB {
                     $ret[$key] = isset($decode['validThrough']) ? $decode['validThrough'] : '';
                 } else if ($key == 'loc') {
                     if (isset($decode['jobLocation']['address'])) {
-                        $adr = $decode['jobLocation']['address'];
+                        $adress = $decode['jobLocation']['address'];
                         $loc = array();
-                        if (isset($adr['addressLocality'])) {
-                            $loc[] = $adr['addressLocality'];
+                        $adr_arr = array();
+                        if (isset($adress['@type'])) {
+                            $adr_arr[0] = $adress;
+                        } else {
+                            $adr_arr = $adress;
                         }
-                        if (isset($adr['addressRegion'])) {
-                            $loc[] = $adr['addressRegion'];
-                        }
-                        if ($loc) {
-                            $ret[$key] = implode(', ', $loc);
+
+                        foreach ($adr_arr as $adr) {
+                            if (isset($adr['addressLocality']) && trim($adr['addressLocality'])) {
+                                $loc[] = trim($adr['addressLocality']);
+                            }
+                            if (isset($adr['addressRegion']) && trim($adr['addressRegion'])) {
+                                $loc[] = trim($adr['addressRegion']);
+                            }
+                            if ($loc) {
+                                $ret[$key] = implode(', ', $loc);
+                            }
                         }
                     }
                 } else if ($key == 'cn') {
