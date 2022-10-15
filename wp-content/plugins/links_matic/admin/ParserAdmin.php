@@ -296,6 +296,25 @@ class ParserAdmin extends ItemAdmin {
                         print '<textarea style="width:90%; height:500px">' . $json . '</textarea>';
 
                         exit;
+                    } else if ($_GET['export_row_urls']) {
+                        $options = $this->mp->get_options($campaign);
+                        $parser_rules = $options['cron_urls']['list_rules'];
+                        $urls_export = array();
+                        if ($parser_rules) {
+
+                            foreach ($parser_rules as $rid => $rule) {
+                                $u = htmlspecialchars(base64_decode($rule['u']));
+                                $c = $rule['c'];
+                                if ($c) {
+                                    $u = $u . " #" . $c;
+                                }
+                                $urls_export[] = $u;
+                            }
+                        }
+                        print '<h2>Export campaign URLs</h2>';
+                        print '<textarea style="width:90%; height:500px">' . implode("\n", $urls_export) . '</textarea>';
+
+                        exit;
                     } else if ($_GET['find_urls']) {
                         print '<h2>Find campaign URLs</h2>';
                         $settings = $this->ml->get_settings();
@@ -2294,6 +2313,55 @@ class ParserAdmin extends ItemAdmin {
         }
 
         ksort($rule_exists);
+
+        // Import rules
+        if ($form_state['import_urls_list']) {
+
+            $add_urls = $form_state['import_urls_list'];
+
+            if (strstr($add_urls, "\n")) {
+                $list = explode("\n", $add_urls);
+            } else {
+                $list = array($add_urls);
+            }
+
+            $old_key = 0;
+            if ($rule_exists) {
+                krsort($rule_exists);
+                $old_key = array_key_first($rule_exists);
+            }
+
+            // Get current unique urls
+            $already = array();
+            foreach ($rule_exists as $v){
+                $already[$v['u']]=1;
+            }
+            
+            $new_rule_key = $old_key + 1;
+            foreach ($list as $rule) {
+
+                $c = '';
+                $u = trim($rule);
+                if (strstr($u, ' #')) {
+                    $rule_arr = explode(' #', $rule);
+                    $u = trim($rule_arr[0]);
+                    $c = $rule_arr[1];
+                }
+                
+                $new_u = base64_encode(stripslashes($u));
+                if ($already[$new_u]){
+                    continue;
+                }
+
+                $new_rule = array(
+                    'u' => $new_u,
+                    'c' => $c,
+                    'a' => 1
+                );
+                $rule_exists[$new_rule_key] = $new_rule;
+                $new_rule_key+=1;
+            }
+        }
 
         return $rule_exists;
     }

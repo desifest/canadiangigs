@@ -305,6 +305,16 @@ if ($cid) {
                         if ($list_type == 2) {
                             $rules = $cron_urls['list_rules'];
                             $this->show_list_rules($rules, true);
+                            ?>
+                            <p><b>Export</b> URLs to <a target="_blank" href="<?php print $url ?>&cid=<?php print $cid ?>&export_row_urls=1">list</a>.</p>
+                            <p><b>Import</b> URLs from list. Example: URL #Comment</p>
+                            <div class="inline-edit-row">
+                                <fieldset>              
+                                    <textarea name="import_urls_list" style="width:100%" rows="3"></textarea>           
+                                </fieldset>
+                            </div>                            
+                            <br />
+                            <?php
                         } else {
                             ?>
                             <label>
