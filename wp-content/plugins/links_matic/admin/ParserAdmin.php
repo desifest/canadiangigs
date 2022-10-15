@@ -2345,7 +2345,7 @@ class ParserAdmin extends ItemAdmin {
                 if (strstr($u, ' #')) {
                     $rule_arr = explode(' #', $rule);
                     $u = trim($rule_arr[0]);
-                    $c = $rule_arr[1];
+                    $c = trim($rule_arr[1]);
                 }
                 
                 $new_u = base64_encode(stripslashes($u));
