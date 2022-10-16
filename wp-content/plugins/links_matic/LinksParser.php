@@ -29,8 +29,8 @@ class LinksParser extends LinksAbstractDB {
             'options' => array(
                 'arhive' => array(
                     'last_update' => 0,
-                    'interval' => 60,
-                    'num' => 10,
+                    'interval' => 5,
+                    'num' => 3,
                     'status' => 0,
                     'proxy' => 0,
                     'webdrivers' => 0,
@@ -55,11 +55,11 @@ class LinksParser extends LinksAbstractDB {
                 'cron_urls' => array(
                     'page' => '',
                     'match' => '',
-                    'interval' => 1440,
+                    'interval' => 5,
                     'last_update' => 0,
                     'status' => 0,
-                    'list_type' => 1,
-                    'list_interval' => 1440,
+                    'list_type' => 2,
+                    'list_interval' => 720,
                     'list_rules' => ''
                 ),
                 'gen_urls' => array(
@@ -85,8 +85,8 @@ class LinksParser extends LinksAbstractDB {
                 ),
                 'parsing' => array(
                     'last_update' => 0,
-                    'interval' => 60,
-                    'num' => 10,
+                    'interval' => 5,
+                    'num' => 20,
                     'pr_num' => 5,
                     'status' => 0,
                     'rules' => '',
@@ -96,13 +96,13 @@ class LinksParser extends LinksAbstractDB {
                 ),
                 'links' => array(
                     'last_update' => 0,
-                    'interval' => 60,
-                    'num' => 10,
+                    'interval' => 5,
+                    'num' => 20,
                     'pr_num' => 5,
                     'status' => 0,
                     'type' => 'm',
-                    'match' => 0,
-                    'rating' => 0,
+                    'match' => 1,
+                    'rating' => 20,
                     'rules' => '',
                     'custom_last_run_id' => 0,
                     'camp' => 0,
