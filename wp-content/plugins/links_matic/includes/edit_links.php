@@ -88,7 +88,16 @@ if ($cid) {
                     <span class="checkbox-title"><?php print __('Use Whitelist for allow blacklist denied posts.') ?></span>
                 </label>
 
-
+                <label class="inline-edit-status">                
+                    <?php
+                    $checked = '';
+                    if ($o['need_wl'] == 1) {
+                        $checked = 'checked="checked"';
+                    }
+                    ?>
+                    <input type="checkbox" name="need_wl" value="1" <?php print $checked ?> >
+                    <span class="checkbox-title"><?php print __('Need Whitelist for allow posts.') ?></span>
+                </label>
 
                 <label>
                     <span class="title"><?php print __('Min match') ?></span>

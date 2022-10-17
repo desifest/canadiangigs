@@ -988,6 +988,7 @@ class ParserAdmin extends ItemAdmin {
             $parsing['status'] = isset($form_state['status']) ? $form_state['status'] : 0;
             $parsing['use_wl'] = isset($form_state['use_wl']) ? $form_state['use_wl'] : 0;
             $parsing['use_bl'] = isset($form_state['use_bl']) ? $form_state['use_bl'] : 0;
+            $parsing['need_wl'] = isset($form_state['need_wl']) ? $form_state['need_wl'] : 0;
 
             // Link to movies
             $parsing['rules'] = $this->links_jobs_rules_form($form_state);

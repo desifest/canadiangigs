@@ -110,6 +110,7 @@ class LinksParser extends LinksAbstractDB {
                     'jobcat' => 105,
                     'use_wl' => 0,
                     'use_bl' => 0,
+                    'need_wl' => 0,
                 ),
             ),
         );
@@ -2611,6 +2612,7 @@ class LinksParser extends LinksAbstractDB {
         // Find active rules
 
         $use_wl = $o['use_wl'];
+        $need_wl = $o['need_wl'];
         $use_bl = $o['use_bl'];
 
         $total_rating = 0;
@@ -2720,27 +2722,28 @@ class LinksParser extends LinksAbstractDB {
         $post_fields = array('t');
         $bl_result = '';
         $bl_valid = true;
-        if ($use_bl) {
-            foreach ($post_fields as $field) {
-                $post_field = $results[$field]['content_f'];
-                if ($post_field) {
-                    $bl_result = $this->check_black_list($post_field);
-                    if ($bl_result) {
-                        $bl_valid = false;
-                        break;
+        if ($use_bl || $need_wl) {
+            if ($use_bl) {
+                foreach ($post_fields as $field) {
+                    $post_field = $results[$field]['content_f'];
+                    if ($post_field) {
+                        $bl_result = $this->check_black_list($post_field);
+                        if ($bl_result) {
+                            $bl_valid = false;
+                            break;
+                        }
                     }
                 }
+                if ($bl_valid) {
+                    $bl_result = 'Not found';
+                }
             }
-            if ($bl_valid) {
-                $bl_result = 'Not found';
-            }
-
-            if (!$bl_valid) {
+            if (!$bl_valid || $need_wl) {
                 // Check Whitelist
 
                 $wl_result = '';
                 $wl_valid = false;
-                if ($use_wl) {
+                if ($use_wl || $need_wl) {
                     foreach ($post_fields as $field) {
                         $post_field = $results[$field]['content_f'];
                         if ($post_field) {
@@ -2774,13 +2777,12 @@ class LinksParser extends LinksAbstractDB {
         if ($use_bl) {
             $fields['bl_valid'] = $bl_valid;
             $fields['bl_result'] = $bl_result;
-
-            if ($use_wl) {
-                $fields['wl_valid'] = $wl_valid;
-                $fields['wl_result'] = $wl_result;
-            }
         }
 
+        if ($use_wl || $need_wl) {
+            $fields['wl_valid'] = $wl_valid;
+            $fields['wl_result'] = $wl_result;
+        }
 
         return array('fields' => $fields, 'results' => $results);
     }
@@ -3151,7 +3153,6 @@ class LinksParser extends LinksAbstractDB {
 
                                     // Update post status
                                     $this->update_post_status($post->uid, 1);
-                                    
                                 } else {
                                     // Add job post
 
