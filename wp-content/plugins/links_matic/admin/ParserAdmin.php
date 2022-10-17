@@ -2135,12 +2135,15 @@ class ParserAdmin extends ItemAdmin {
                 <p class="table-view-list">Total match: <?php print $fields['total_match'] ?>; Total rating: <?php print $fields['total_rating'] ?>; 
                     Valid: <?php print $fields['valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?><br />
                     Post hash: <?php print $fields['post_hash'] ?>. Hash valid: <?php print $fields['hash_valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?>
-                    <?php if ($fields['wl_result']) { ?>
-                        <br />Whitelist keyword: "<?php print $fields['wl_result'] ?>". Valid: <?php print $fields['wl_valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?>
-                    <?php } ?>
+
                     <?php if ($fields['bl_result']) { ?>
                         <br />Blacklist keyword: "<?php print $fields['bl_result'] ?>". Valid: <?php print $fields['bl_valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?>
                     <?php } ?>
+
+                    <?php if ($fields['wl_result']) { ?>
+                        <br />Whitelist keyword: "<?php print $fields['wl_result'] ?>". Valid: <?php print $fields['wl_valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?>
+                    <?php } ?>
+
                 </p>
                 <table class="wp-list-table widefat striped table-view-list">
                     <thead>

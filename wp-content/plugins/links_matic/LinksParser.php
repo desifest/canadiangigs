@@ -2716,29 +2716,8 @@ class LinksParser extends LinksAbstractDB {
             }
         }
 
-        // Check Whitelist
-        $post_fields = array('t', 'desc');
-        $wl_result = '';
-        $wl_valid = true;
-        if ($use_wl) {
-            $wl_valid = false;
-            foreach ($post_fields as $field) {
-                $post_field = $results[$field]['content_f'];
-                if ($post_field) {
-                    $wl_result = $this->check_white_list($post_field);
-                    if ($wl_result) {
-                        $wl_valid = true;
-                        break;
-                    }
-                }
-            }
-            if (!$wl_valid) {
-                $valid = false;
-                $wl_result = 'Not found';
-            }
-        }
-
         // Check Blacklist
+        $post_fields = array('t');
         $bl_result = '';
         $bl_valid = true;
         if ($use_bl) {
@@ -2752,12 +2731,37 @@ class LinksParser extends LinksAbstractDB {
                     }
                 }
             }
-            if (!$bl_valid) {
-                $valid = false;
-            } else {
+            if ($bl_valid) {
                 $bl_result = 'Not found';
             }
+
+            if (!$bl_valid) {
+                // Check Whitelist
+
+                $wl_result = '';
+                $wl_valid = false;
+                if ($use_wl) {
+                    foreach ($post_fields as $field) {
+                        $post_field = $results[$field]['content_f'];
+                        if ($post_field) {
+                            $wl_result = $this->check_white_list($post_field);
+                            if ($wl_result) {
+                                $wl_valid = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!$wl_valid) {
+                        $wl_result = 'Not found';
+                    }
+                }
+
+                if (!$wl_valid) {
+                    $valid = false;
+                }
+            }
         }
+
 
         $fields = array(
             'total_rating' => $total_rating,
@@ -2767,15 +2771,16 @@ class LinksParser extends LinksAbstractDB {
             'hash_valid' => $hash_valid,
         );
 
-        if ($use_wl) {
-            $fields['wl_valid'] = $wl_valid;
-            $fields['wl_result'] = $wl_result;
-        }
-
         if ($use_bl) {
             $fields['bl_valid'] = $bl_valid;
             $fields['bl_result'] = $bl_result;
+
+            if ($use_wl) {
+                $fields['wl_valid'] = $wl_valid;
+                $fields['wl_result'] = $wl_result;
+            }
         }
+
 
         return array('fields' => $fields, 'results' => $results);
     }
