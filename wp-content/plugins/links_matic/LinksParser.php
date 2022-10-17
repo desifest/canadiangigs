@@ -3568,33 +3568,42 @@ class LinksParser extends LinksAbstractDB {
     }
 
     public function check_white_list($content = '') {
-        $found = '';
-        $settings = $this->ml->get_settings();
-        $alias_str = $settings['job_white_alias'] ? base64_decode($settings['job_white_alias']) : '';
-        if ($alias_str) {
-            $keys = explode(',', $alias_str);
-            foreach ($keys as $keyword) {
-                $keyword = trim($keyword);
-                if (preg_match("/" . $keyword . "/i", $content)) {
-                    $found = $keyword;
-                    break;
-                }
-            }
-        }
+        $job_alias = 'job_white_alias';
+        $found = $this->check_list($content, $job_alias);
         return $found;
     }
 
     public function check_black_list($content = '') {
+        $job_alias = 'job_black_alias';
+        $found = $this->check_list($content, $job_alias);
+        return $found;
+    }
+
+    public function check_list($content = '', $job_alias = '') {
         $found = '';
         $settings = $this->ml->get_settings();
-        $alias_str = $settings['job_black_alias'] ? base64_decode($settings['job_black_alias']) : '';
+        $alias_str = $settings[$job_alias] ? base64_decode($settings[$job_alias]) : '';
         if ($alias_str) {
             $keys = explode(',', $alias_str);
             foreach ($keys as $keyword) {
                 $keyword = trim($keyword);
-                if (preg_match("/" . $keyword . "/i", $content)) {
-                    $found = $keyword;
-                    break;
+                if ($keyword) {
+                    $reg_pre = '(?:[^\w\d]+|^)';
+                    $reg_after = '(?:[^\w\d]+|$)';
+                    if (mb_substr($keyword, 0, 1) == '*') {
+                        $keyword = mb_substr($keyword, 1);
+                        $reg_pre = '';
+                    }
+                    if (mb_substr($keyword, -1) == '*') {
+                        $keyword = mb_substr($keyword, 0, -1);
+                        $reg_after = '';
+                    }
+                    $reg = "/" . $reg_pre . $keyword . $reg_after . "/i";
+
+                    if (preg_match($reg, $content)) {
+                        $found = $keyword;
+                        break;
+                    }
                 }
             }
         }
