@@ -470,13 +470,6 @@ class LinksParserCron extends LinksAbstractDB {
                         } else {
                             $message = 'The post is not valid';
 
-                            // Use wl
-                            if ($fields['wl_result']) {
-                                if (!$fields['wl_valid']) {
-                                    $message = 'Whitelist keywords not found';
-                                }
-                            }
-
                             // Use bl
                             if ($fields['bl_result']) {
                                 if (!$fields['bl_valid']) {

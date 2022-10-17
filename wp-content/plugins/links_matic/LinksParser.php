@@ -3107,6 +3107,111 @@ class LinksParser extends LinksAbstractDB {
         }
     }
 
+    public function force_post_links($uid) {
+        $url = $this->get_url($uid);
+
+        if ($url) {
+            $campaign = $this->get_campaign($url->cid, true);
+            $post = $this->get_post_by_uid($uid);
+            $last_posts = array($post);
+            if ($last_posts && $campaign) {
+                $cid = $campaign->id;
+                $options = $this->get_options($campaign);
+                $o = $options['links'];
+                $items = $this->find_posts_links($last_posts, $o, $campaign->type);
+
+                foreach ($items as $pid => $item) {
+
+                    $post = $item['post'];
+                    $fields = $item['fields'];
+                    $results = $item['results'];
+
+                    if ($results) {
+                        if (!$fields['hash_valid'] && !$post->top_movie) {
+                            $this->update_post_status($post->uid, 3);
+                            $message = 'The post already exist';
+                            $this->log_warn($message, $cid, $post->uid, 4);
+                        } else {
+
+                            if ($fields['valid']) {
+
+                                if ($post->top_movie) {
+                                    // Publish job post
+                                    $wp_post = get_post($post->top_movie);
+                                    if ($wp_post && $wp_post->post_status != 'publish') {
+                                        $job_post = [
+                                            'ID' => $post->top_movie,
+                                            'post_status' => 'publish',
+                                        ];
+                                        wp_update_post(wp_slash($job_post));
+
+                                        $message = "Publish job: title: " . $post->title . "; jid:" . $post->top_movie;
+                                        $this->log_info($message, $cid, $post->uid, 4);
+                                    }
+
+                                    // Update post status
+                                    $this->update_post_status($post->uid, 1);
+                                    
+                                } else {
+                                    // Add job post
+
+                                    $rating = $fields['total_rating'];
+                                    $status = 1;
+                                    $top_movie = $this->add_job_post($campaign, $post, $results);
+                                    if ($top_movie > 0) {
+                                        $data = array(
+                                            'status_links' => $status,
+                                            'top_movie' => $top_movie,
+                                            'rating' => $rating,
+                                            'post_hash' => $fields['post_hash'],
+                                        );
+                                        $this->update_post_fields($data, $pid);
+                                        $message = "Add job: title: " . $post->title . "; jid: $top_movie; rating: $rating";
+                                        $this->log_info($message, $cid, $post->uid, 4);
+                                    } else {
+                                        $this->update_post_status($post->uid, 2);
+                                        $message = 'Can not add job post';
+                                        $this->log_error($message, $cid, $post->uid, 4);
+                                    }
+                                }
+                            } else {
+
+                                if ($post->top_movie) {
+
+                                    // Update exist job post                                     
+                                    $wp_post = get_post($post->top_movie);
+
+                                    if ($wp_post && $wp_post->post_status != 'draft') {
+                                        $job_post = [
+                                            'ID' => $post->top_movie,
+                                            'post_status' => 'draft',
+                                        ];
+                                        wp_update_post(wp_slash($job_post));
+
+                                        $message = "Draft job: title: " . $post->title . "; jid:" . $post->top_movie;
+                                        $this->log_warn($message, $cid, $post->uid, 4);
+                                    }
+                                }
+
+                                $message = 'The post is not valid';
+
+                                // Use bl
+                                if ($fields['bl_result']) {
+                                    if (!$fields['bl_valid']) {
+                                        $message = 'Blacklist keywords found: ' . $fields['bl_result'];
+                                    }
+                                }
+
+                                $this->update_post_status($post->uid, 2);
+                                $this->log_warn($message, $cid, $post->uid, 4);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /*
      * Actors
      */

@@ -131,6 +131,7 @@ class ParserAdmin extends ItemAdmin {
     public $bulk_actions = array(
         'post_status_new' => 'Post status New',
         'validate_arhive' => 'Validate Arhive len',
+        'force_links' => 'Force Links',
         'delete_url' => 'Delete URL',
         'delete_post' => 'Delete Post',
         'delete_arhive' => 'Delete Arhive and Post',
@@ -849,7 +850,13 @@ class ParserAdmin extends ItemAdmin {
                         $this->mp->validate_arhive_len($id);
                     }
                     print "<div class=\"updated\"><p><strong>Updated</strong></p></div>";
-                } else if ($b == 'delete_post') {
+                } else if ($b == 'force_links') {
+                    // Force links posts
+                    foreach ($ids as $id) {
+                        $this->mp->force_post_links($id);
+                    }
+                    print "<div class=\"updated\"><p><strong>Updated</strong></p></div>";
+                }else if ($b == 'delete_post') {
                     // Delete url                   
                     foreach ($ids as $id) {
                         $this->mp->delete_post_by_url_id($id);
