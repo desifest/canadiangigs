@@ -979,6 +979,8 @@ class ParserAdmin extends ItemAdmin {
                 }
             }
             $parsing['status'] = isset($form_state['status']) ? $form_state['status'] : 0;
+            $parsing['use_wl'] = isset($form_state['use_wl']) ? $form_state['use_wl'] : 0;
+            $parsing['use_bl'] = isset($form_state['use_bl']) ? $form_state['use_bl'] : 0;
 
             // Link to movies
             $parsing['rules'] = $this->links_jobs_rules_form($form_state);
@@ -2133,6 +2135,12 @@ class ParserAdmin extends ItemAdmin {
                 <p class="table-view-list">Total match: <?php print $fields['total_match'] ?>; Total rating: <?php print $fields['total_rating'] ?>; 
                     Valid: <?php print $fields['valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?><br />
                     Post hash: <?php print $fields['post_hash'] ?>. Hash valid: <?php print $fields['hash_valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?>
+                    <?php if ($fields['wl_result']) { ?>
+                        <br />Whitelist keyword: "<?php print $fields['wl_result'] ?>". Valid: <?php print $fields['wl_valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?>
+                    <?php } ?>
+                    <?php if ($fields['bl_result']) { ?>
+                        <br />Blacklist keyword: "<?php print $fields['bl_result'] ?>". Valid: <?php print $fields['bl_valid'] ? '<b class="green">True</b>' : '<b class="red">False</b>'  ?>
+                    <?php } ?>
                 </p>
                 <table class="wp-list-table widefat striped table-view-list">
                     <thead>
@@ -2333,10 +2341,10 @@ class ParserAdmin extends ItemAdmin {
 
             // Get current unique urls
             $already = array();
-            foreach ($rule_exists as $v){
-                $already[$v['u']]=1;
+            foreach ($rule_exists as $v) {
+                $already[$v['u']] = 1;
             }
-            
+
             $new_rule_key = $old_key + 1;
             foreach ($list as $rule) {
 
@@ -2347,9 +2355,9 @@ class ParserAdmin extends ItemAdmin {
                     $u = trim($rule_arr[0]);
                     $c = trim($rule_arr[1]);
                 }
-                
+
                 $new_u = base64_encode(stripslashes($u));
-                if ($already[$new_u]){
+                if ($already[$new_u]) {
                     continue;
                 }
 
@@ -2359,7 +2367,7 @@ class ParserAdmin extends ItemAdmin {
                     'a' => 1
                 );
                 $rule_exists[$new_rule_key] = $new_rule;
-                $new_rule_key+=1;
+                $new_rule_key += 1;
             }
         }
 

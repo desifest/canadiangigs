@@ -456,8 +456,8 @@ class LinksParserCron extends LinksAbstractDB {
                                 $data = array(
                                     'status_links' => $status,
                                     'top_movie' => $top_movie,
-                                    'rating' => $rating,             
-                                    'post_hash' => $fields['post_hash'],  
+                                    'rating' => $rating,
+                                    'post_hash' => $fields['post_hash'],
                                 );
                                 $this->mp->update_post_fields($data, $pid);
                                 $message = "Add job: title: " . $post->title . "; jid: $top_movie; rating: $rating";
@@ -468,8 +468,24 @@ class LinksParserCron extends LinksAbstractDB {
                                 $this->mp->log_error($message, $cid, $post->uid, 4);
                             }
                         } else {
-                            $this->mp->update_post_status($post->uid, 2);
                             $message = 'The post is not valid';
+
+                            // Use wl
+                            if ($fields['wl_result']) {
+                                if (!$fields['wl_valid']) {
+                                    $message = 'Whitelist keywords not found';
+                                }
+                            }
+
+                            // Use bl
+                            if ($fields['bl_result']) {
+                                if (!$fields['bl_valid']) {
+                                    $message = 'Blacklist keywords found: '.$fields['bl_result'];
+                                }
+                            }
+
+                            $this->mp->update_post_status($post->uid, 2);
+
                             $this->mp->log_warn($message, $cid, $post->uid, 4);
                         }
                     }

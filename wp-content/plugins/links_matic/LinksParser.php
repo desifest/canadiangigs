@@ -108,6 +108,8 @@ class LinksParser extends LinksAbstractDB {
                     'camp' => 0,
                     'weight' => 10,
                     'jobcat' => 105,
+                    'use_wl' => 0,
+                    'use_bl' => 0,
                 ),
             ),
         );
@@ -2608,6 +2610,9 @@ class LinksParser extends LinksAbstractDB {
 
         // Find active rules
 
+        $use_wl = $o['use_wl'];
+        $use_bl = $o['use_bl'];
+
         $total_rating = 0;
         $total_match = 0;
 
@@ -2711,14 +2716,66 @@ class LinksParser extends LinksAbstractDB {
             }
         }
 
+        // Check Whitelist
+        $post_fields = array('t', 'desc');
+        $wl_result = '';
+        $wl_valid = true;
+        if ($use_wl) {
+            $wl_valid = false;
+            foreach ($post_fields as $field) {
+                $post_field = $results[$field]['content_f'];
+                if ($post_field) {
+                    $wl_result = $this->check_white_list($post_field);
+                    if ($wl_result) {
+                        $wl_valid = true;
+                        break;
+                    }
+                }
+            }
+            if (!$wl_valid) {
+                $valid = false;
+                $wl_result = 'Not found';
+            }
+        }
+
+        // Check Blacklist
+        $bl_result = '';
+        $bl_valid = true;
+        if ($use_bl) {
+            foreach ($post_fields as $field) {
+                $post_field = $results[$field]['content_f'];
+                if ($post_field) {
+                    $bl_result = $this->check_black_list($post_field);
+                    if ($bl_result) {
+                        $bl_valid = false;
+                        break;
+                    }
+                }
+            }
+            if (!$bl_valid) {
+                $valid = false;
+            } else {
+                $bl_result = 'Not found';
+            }
+        }
 
         $fields = array(
             'total_rating' => $total_rating,
             'total_match' => $total_match,
             'valid' => $valid,
             'post_hash' => $post_hash,
-            'hash_valid' => $hash_valid
+            'hash_valid' => $hash_valid,
         );
+
+        if ($use_wl) {
+            $fields['wl_valid'] = $wl_valid;
+            $fields['wl_result'] = $wl_result;
+        }
+
+        if ($use_bl) {
+            $fields['bl_valid'] = $bl_valid;
+            $fields['bl_result'] = $bl_result;
+        }
 
         return array('fields' => $fields, 'results' => $results);
     }
@@ -3259,22 +3316,43 @@ class LinksParser extends LinksAbstractDB {
          */
         $ret = array();
         $job_script = '';
-        if (preg_match_all('/<script[^>]*>(.*)<\/script>/Us', $code, $match)){
+        if (preg_match_all('/<script[^>]*>(.*)<\/script>/Us', $code, $match)) {
             foreach ($match[1] as $item) {
-                if (strstr($item,"JobPosting")){
+                if (strstr($item, "JobPosting")) {
                     $job_script = $item;
                     break;
                 }
             }
         }
-        // $job_reg = '/<script[^>]*>([^<]*type":"JobPosting".*)<\/script>/Us';
-        
-        if (preg_match('/({.*})/s', $job_script, $match)) {
-            $decode = json_decode($match[1], true);
-            /*print '<pre>';
-            print_r($decode);
-            print '</pre>';*/
 
+
+
+        // $job_reg = '/<script[^>]*>([^<]*type":"JobPosting".*)<\/script>/Us';
+
+        if (preg_match('/({.*})/s', $job_script, $match)) {
+            $json = $match[1];
+
+            // Find multiscripts
+            $json_arr = explode('{"@context"', $json);
+
+            if (sizeof($json_arr) > 2) {
+                $job_script = '';
+                foreach ($json_arr as $value) {
+                    if (strstr($value, "JobPosting")) {
+                        $job_script = $value;
+                        break;
+                    }
+                }
+                $job_script = preg_replace('/,$/', '', $job_script);
+                $json = '{"@context"' . $job_script;
+            }
+
+            $decode = json_decode($json, true);
+            /*
+              print '<pre>';
+              print_r($decode);
+              print '</pre>';
+             */
             $rules_fields = $this->parser_rules_fields;
             foreach ($rules_fields as $key => $title) {
                 if ($key == 't') {
@@ -3328,10 +3406,10 @@ class LinksParser extends LinksAbstractDB {
                                 $loc[] = trim($adr['addressRegion']);
                             }
                             if ($loc) {
-                                $regions[]= implode(', ', $loc);
+                                $regions[] = implode(', ', $loc);
                             }
                         }
-                        
+
                         // $ret[$key] = implode('; ', $regions);
                         $ret[$key] = array_pop($regions);
                     }
@@ -3376,6 +3454,40 @@ class LinksParser extends LinksAbstractDB {
             <textarea name="job_<?php print $slug ?>_alias_<?php print $key ?>" style="width:90%" rows="3"><?php print $value; ?></textarea>                               
             <?php
         }
+    }
+
+    public function check_white_list($content = '') {
+        $found = '';
+        $settings = $this->ml->get_settings();
+        $alias_str = $settings['job_white_alias'] ? base64_decode($settings['job_white_alias']) : '';
+        if ($alias_str) {
+            $keys = explode(',', $alias_str);
+            foreach ($keys as $keyword) {
+                $keyword = trim($keyword);
+                if (preg_match("/" . $keyword . "/i", $content)) {
+                    $found = $keyword;
+                    break;
+                }
+            }
+        }
+        return $found;
+    }
+
+    public function check_black_list($content = '') {
+        $found = '';
+        $settings = $this->ml->get_settings();
+        $alias_str = $settings['job_black_alias'] ? base64_decode($settings['job_black_alias']) : '';
+        if ($alias_str) {
+            $keys = explode(',', $alias_str);
+            foreach ($keys as $keyword) {
+                $keyword = trim($keyword);
+                if (preg_match("/" . $keyword . "/i", $content)) {
+                    $found = $keyword;
+                    break;
+                }
+            }
+        }
+        return $found;
     }
 
     public function filter_job_type($content = '', $slug = 'type', $cat_def = 0) {

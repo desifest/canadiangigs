@@ -31,6 +31,8 @@ class LinksMatic extends LinksAbstractDB {
             'job_type_alias' => '',
             'job_category_alias' => '',
             'job_expired' => 30,
+            'job_white_alias' => '',
+            'job_black_alias' => '',
         );
 
         $this->db = array(
@@ -210,6 +212,14 @@ class LinksMatic extends LinksAbstractDB {
                 $new_value = $form[$key];
                 $ss[$key] = $new_value;
             }
+        }
+
+        if (isset($form['job_white_alias'])) {
+            $ss['job_white_alias'] = base64_encode($form['job_white_alias']);
+        }
+
+        if (isset($form['job_black_alias'])) {
+            $ss['job_black_alias'] = base64_encode($form['job_black_alias']);
         }
 
         if (isset($form['job_type'])) {
