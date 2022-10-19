@@ -49,7 +49,7 @@ global $post;
     <div class="job_application application">
         <input type="button" class="application_button button" value="<?php esc_attr_e( 'Apply for job', 'wp-job-manager' ); ?>" />
         <div class="application_details">
-            <?php esc_attr_e( 'To apply this job please', 'wp-job-manager' ); ?> <a href="#" class="login" data-toggle="modal" data-target="#login-modal"><?php esc_attr_e( 'Sing Up', 'wp-job-manager' ); ?></a>
+            <?php esc_attr_e( 'To apply this job please', 'wp-job-manager' ); ?> <a href="#" class="login" data-toggle="modal" data-target="#login-modal"><?php esc_attr_e( 'Login or Register', 'wp-job-manager' ); ?></a>
         </div>
     </div>
     <?php
