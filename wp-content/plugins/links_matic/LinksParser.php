@@ -108,6 +108,9 @@ class LinksParser extends LinksAbstractDB {
                     'camp' => 0,
                     'weight' => 10,
                     'jobcat' => 105,
+                    'use_wl' => 0,
+                    'use_bl' => 0,
+                    'need_wl' => 0,
                 ),
             ),
         );
@@ -2608,6 +2611,10 @@ class LinksParser extends LinksAbstractDB {
 
         // Find active rules
 
+        $use_wl = $o['use_wl'];
+        $need_wl = $o['need_wl'];
+        $use_bl = $o['use_bl'];
+
         $total_rating = 0;
         $total_match = 0;
 
@@ -2711,14 +2718,71 @@ class LinksParser extends LinksAbstractDB {
             }
         }
 
+        // Check Blacklist
+        $post_fields = array('t');
+        $bl_result = '';
+        $bl_valid = true;
+        if ($use_bl || $need_wl) {
+            if ($use_bl) {
+                foreach ($post_fields as $field) {
+                    $post_field = $results[$field]['content_f'];
+                    if ($post_field) {
+                        $bl_result = $this->check_black_list($post_field);
+                        if ($bl_result) {
+                            $bl_valid = false;
+                            break;
+                        }
+                    }
+                }
+                if ($bl_valid) {
+                    $bl_result = 'Not found';
+                }
+            }
+            if (!$bl_valid || $need_wl) {
+                // Check Whitelist
+
+                $wl_result = '';
+                $wl_valid = false;
+                if ($use_wl || $need_wl) {
+                    foreach ($post_fields as $field) {
+                        $post_field = $results[$field]['content_f'];
+                        if ($post_field) {
+                            $wl_result = $this->check_white_list($post_field);
+                            if ($wl_result) {
+                                $wl_valid = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!$wl_valid) {
+                        $wl_result = 'Not found';
+                    }
+                }
+
+                if (!$wl_valid) {
+                    $valid = false;
+                }
+            }
+        }
+
 
         $fields = array(
             'total_rating' => $total_rating,
             'total_match' => $total_match,
             'valid' => $valid,
             'post_hash' => $post_hash,
-            'hash_valid' => $hash_valid
+            'hash_valid' => $hash_valid,
         );
+
+        if ($use_bl) {
+            $fields['bl_valid'] = $bl_valid;
+            $fields['bl_result'] = $bl_result;
+        }
+
+        if ($use_wl || $need_wl) {
+            $fields['wl_valid'] = $wl_valid;
+            $fields['wl_result'] = $wl_result;
+        }
 
         return array('fields' => $fields, 'results' => $results);
     }
@@ -3045,6 +3109,110 @@ class LinksParser extends LinksAbstractDB {
         }
     }
 
+    public function force_post_links($uid) {
+        $url = $this->get_url($uid);
+
+        if ($url) {
+            $campaign = $this->get_campaign($url->cid, true);
+            $post = $this->get_post_by_uid($uid);
+            $last_posts = array($post);
+            if ($last_posts && $campaign) {
+                $cid = $campaign->id;
+                $options = $this->get_options($campaign);
+                $o = $options['links'];
+                $items = $this->find_posts_links($last_posts, $o, $campaign->type);
+
+                foreach ($items as $pid => $item) {
+
+                    $post = $item['post'];
+                    $fields = $item['fields'];
+                    $results = $item['results'];
+
+                    if ($results) {
+                        if (!$fields['hash_valid'] && !$post->top_movie) {
+                            $this->update_post_status($post->uid, 3);
+                            $message = 'The post already exist';
+                            $this->log_warn($message, $cid, $post->uid, 4);
+                        } else {
+
+                            if ($fields['valid']) {
+
+                                if ($post->top_movie) {
+                                    // Publish job post
+                                    $wp_post = get_post($post->top_movie);
+                                    if ($wp_post && $wp_post->post_status != 'publish') {
+                                        $job_post = [
+                                            'ID' => $post->top_movie,
+                                            'post_status' => 'publish',
+                                        ];
+                                        wp_update_post(wp_slash($job_post));
+
+                                        $message = "Publish job: title: " . $post->title . "; jid:" . $post->top_movie;
+                                        $this->log_info($message, $cid, $post->uid, 4);
+                                    }
+
+                                    // Update post status
+                                    $this->update_post_status($post->uid, 1);
+                                } else {
+                                    // Add job post
+
+                                    $rating = $fields['total_rating'];
+                                    $status = 1;
+                                    $top_movie = $this->add_job_post($campaign, $post, $results);
+                                    if ($top_movie > 0) {
+                                        $data = array(
+                                            'status_links' => $status,
+                                            'top_movie' => $top_movie,
+                                            'rating' => $rating,
+                                            'post_hash' => $fields['post_hash'],
+                                        );
+                                        $this->update_post_fields($data, $pid);
+                                        $message = "Add job: title: " . $post->title . "; jid: $top_movie; rating: $rating";
+                                        $this->log_info($message, $cid, $post->uid, 4);
+                                    } else {
+                                        $this->update_post_status($post->uid, 2);
+                                        $message = 'Can not add job post';
+                                        $this->log_error($message, $cid, $post->uid, 4);
+                                    }
+                                }
+                            } else {
+
+                                if ($post->top_movie) {
+
+                                    // Update exist job post                                     
+                                    $wp_post = get_post($post->top_movie);
+
+                                    if ($wp_post && $wp_post->post_status != 'draft') {
+                                        $job_post = [
+                                            'ID' => $post->top_movie,
+                                            'post_status' => 'draft',
+                                        ];
+                                        wp_update_post(wp_slash($job_post));
+
+                                        $message = "Draft job: title: " . $post->title . "; jid:" . $post->top_movie;
+                                        $this->log_warn($message, $cid, $post->uid, 4);
+                                    }
+                                }
+
+                                $message = 'The post is not valid';
+
+                                // Use bl
+                                if ($fields['bl_result']) {
+                                    if (!$fields['bl_valid']) {
+                                        $message = 'Blacklist keywords found: ' . $fields['bl_result'];
+                                    }
+                                }
+
+                                $this->update_post_status($post->uid, 2);
+                                $this->log_warn($message, $cid, $post->uid, 4);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /*
      * Actors
      */
@@ -3259,22 +3427,43 @@ class LinksParser extends LinksAbstractDB {
          */
         $ret = array();
         $job_script = '';
-        if (preg_match_all('/<script[^>]*>(.*)<\/script>/Us', $code, $match)){
+        if (preg_match_all('/<script[^>]*>(.*)<\/script>/Us', $code, $match)) {
             foreach ($match[1] as $item) {
-                if (strstr($item,"JobPosting")){
+                if (strstr($item, "JobPosting")) {
                     $job_script = $item;
                     break;
                 }
             }
         }
-        // $job_reg = '/<script[^>]*>([^<]*type":"JobPosting".*)<\/script>/Us';
-        
-        if (preg_match('/({.*})/s', $job_script, $match)) {
-            $decode = json_decode($match[1], true);
-            /*print '<pre>';
-            print_r($decode);
-            print '</pre>';*/
 
+
+
+        // $job_reg = '/<script[^>]*>([^<]*type":"JobPosting".*)<\/script>/Us';
+
+        if (preg_match('/({.*})/s', $job_script, $match)) {
+            $json = $match[1];
+
+            // Find multiscripts
+            $json_arr = explode('{"@context"', $json);
+
+            if (sizeof($json_arr) > 2) {
+                $job_script = '';
+                foreach ($json_arr as $value) {
+                    if (strstr($value, "JobPosting")) {
+                        $job_script = $value;
+                        break;
+                    }
+                }
+                $job_script = preg_replace('/,$/', '', $job_script);
+                $json = '{"@context"' . $job_script;
+            }
+
+            $decode = json_decode($json, true);
+            /*
+              print '<pre>';
+              print_r($decode);
+              print '</pre>';
+             */
             $rules_fields = $this->parser_rules_fields;
             foreach ($rules_fields as $key => $title) {
                 if ($key == 't') {
@@ -3328,10 +3517,10 @@ class LinksParser extends LinksAbstractDB {
                                 $loc[] = trim($adr['addressRegion']);
                             }
                             if ($loc) {
-                                $regions[]= implode(', ', $loc);
+                                $regions[] = implode(', ', $loc);
                             }
                         }
-                        
+
                         // $ret[$key] = implode('; ', $regions);
                         $ret[$key] = array_pop($regions);
                     }
@@ -3376,6 +3565,49 @@ class LinksParser extends LinksAbstractDB {
             <textarea name="job_<?php print $slug ?>_alias_<?php print $key ?>" style="width:90%" rows="3"><?php print $value; ?></textarea>                               
             <?php
         }
+    }
+
+    public function check_white_list($content = '') {
+        $job_alias = 'job_white_alias';
+        $found = $this->check_list($content, $job_alias);
+        return $found;
+    }
+
+    public function check_black_list($content = '') {
+        $job_alias = 'job_black_alias';
+        $found = $this->check_list($content, $job_alias);
+        return $found;
+    }
+
+    public function check_list($content = '', $job_alias = '') {
+        $found = '';
+        $settings = $this->ml->get_settings();
+        $alias_str = $settings[$job_alias] ? base64_decode($settings[$job_alias]) : '';
+        if ($alias_str) {
+            $keys = explode(',', $alias_str);
+            foreach ($keys as $keyword) {
+                $keyword = trim($keyword);
+                if ($keyword) {
+                    $reg_pre = '(?:[^\w\d]+|^)';
+                    $reg_after = '(?:[^\w\d]+|$)';
+                    if (mb_substr($keyword, 0, 1) == '*') {
+                        $keyword = mb_substr($keyword, 1);
+                        $reg_pre = '';
+                    }
+                    if (mb_substr($keyword, -1) == '*') {
+                        $keyword = mb_substr($keyword, 0, -1);
+                        $reg_after = '';
+                    }
+                    $reg = "/" . $reg_pre . $keyword . $reg_after . "/i";
+
+                    if (preg_match($reg, $content)) {
+                        $found = $keyword;
+                        break;
+                    }
+                }
+            }
+        }
+        return $found;
     }
 
     public function filter_job_type($content = '', $slug = 'type', $cat_def = 0) {

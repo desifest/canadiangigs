@@ -32,7 +32,22 @@
             </label>
             <br /><br />
 
-
+            <h3>Blacklist words</h3>
+            <?php
+            $job_black_alias = $ss['job_black_alias'] ? htmlspecialchars(base64_decode($ss['job_black_alias'])) : '';
+            ?>
+            <textarea name="job_black_alias" style="width:90%" rows="3"><?php print $job_black_alias; ?></textarea>                               
+           
+            <br />
+            
+            <h3>Whitelist words (exclude blacklist)</h3>
+            <?php
+            $job_white_alias = $ss['job_white_alias'] ? htmlspecialchars(base64_decode($ss['job_white_alias'])) : '';
+            ?>
+            <textarea name="job_white_alias" style="width:90%" rows="3"><?php print $job_white_alias; ?></textarea>                               
+             <p>Enter coma separated alias words.</p>
+            <br />
+           
 
             <h2>Job type alias keys</h2>
             <p>Enter coma separated alias for job types.</p>

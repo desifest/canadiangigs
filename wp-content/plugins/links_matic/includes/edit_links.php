@@ -65,6 +65,39 @@ if ($cid) {
                     <input type="checkbox" name="status" value="1" <?php print $checked ?> >
                     <span class="checkbox-title"><?php print __('Links is active') ?></span>
                 </label>
+                
+                <label class="inline-edit-status">                
+                    <?php
+                    $checked = '';
+                    if ($o['use_bl'] == 1) {
+                        $checked = 'checked="checked"';
+                    }
+                    ?>
+                    <input type="checkbox" name="use_bl" value="1" <?php print $checked ?> >
+                    <span class="checkbox-title"><?php print __('Use Blacklist for deny posts.') ?></span>
+                </label>
+                
+                <label class="inline-edit-status">                
+                    <?php
+                    $checked = '';
+                    if ($o['use_wl'] == 1) {
+                        $checked = 'checked="checked"';
+                    }
+                    ?>
+                    <input type="checkbox" name="use_wl" value="1" <?php print $checked ?> >
+                    <span class="checkbox-title"><?php print __('Use Whitelist for allow blacklist denied posts.') ?></span>
+                </label>
+
+                <label class="inline-edit-status">                
+                    <?php
+                    $checked = '';
+                    if ($o['need_wl'] == 1) {
+                        $checked = 'checked="checked"';
+                    }
+                    ?>
+                    <input type="checkbox" name="need_wl" value="1" <?php print $checked ?> >
+                    <span class="checkbox-title"><?php print __('Need Whitelist for allow posts.') ?></span>
+                </label>
 
                 <label>
                     <span class="title"><?php print __('Min match') ?></span>
@@ -143,7 +176,7 @@ if ($cid) {
     if (isset($_POST['preview'])) {
         if ($preivew_data) {
             $this->preview_links_job($preivew_data);
-        } 
+        }
     }
     ?>
 
