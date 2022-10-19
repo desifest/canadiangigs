@@ -38,9 +38,24 @@ global $post;
 			<?php wpjm_the_job_description(); ?>
 		</div>
 
-		<?php if ( is_user_logged_in() && candidates_can_apply() ) : ?>
-			<?php get_job_manager_template( 'job-application.php' ); ?>
-		<?php endif; ?>
+		<?php if ( is_user_logged_in() && candidates_can_apply() ) {
+            get_job_manager_template( 'job-application.php' );
+		} else if (!is_user_logged_in() && candidates_can_apply() )
+        {
+            //login user
+
+	wp_enqueue_script( 'wp-job-manager-job-application' );
+	?>
+    <div class="job_application application">
+        <input type="button" class="application_button button" value="<?php esc_attr_e( 'Apply for job', 'wp-job-manager' ); ?>" />
+        <div class="application_details">
+            <?php esc_attr_e( 'To apply this job please', 'wp-job-manager' ); ?> <a href="#" class="login" data-toggle="modal" data-target="#login-modal"><?php esc_attr_e( 'Sing Up', 'wp-job-manager' ); ?></a>
+        </div>
+    </div>
+    <?php
+        }
+		?>
+
 
 		<?php
 			/**
