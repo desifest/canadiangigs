@@ -140,7 +140,7 @@ class LinksParserCron extends LinksAbstractDB {
         $status = 0;
         $urls = $this->mp->get_last_urls($urls_count, $status, $campaign->id, $random_urls);
 
-        $count = sizeof($urls);
+        $count = count((array)$urls);
         if ($count) {
             $this->get_async_cron($campaign, $type_name);
             // $this->arhive_urls($campaign, $options, $urls);
@@ -695,7 +695,7 @@ class LinksParserCron extends LinksAbstractDB {
             $random_urls = $type_opt['random'];
             $urls = $this->mp->get_last_urls($urls_count, $status, $campaign->id, $random_urls, $debug);
 
-            $count = sizeof($urls);
+            $count = count((array)$urls);
             if ($debug) {
                 print_r(array('Arhive count', $count));
             }

@@ -21,16 +21,16 @@
 
 // ** Database settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'db98g0xvkgovbg' );
+define( 'DB_NAME', 'canadianmusicgigs' );
 
 /** Database username */
-define( 'DB_USER', 'uxvz9a62do8zm' );
+define( 'DB_USER', 'root' );
 
 /** Database password */
-define( 'DB_PASSWORD', '6vzdq6hqos5n' );
+define( 'DB_PASSWORD', '12345' );
 
 /** Database hostname */
-define( 'DB_HOST', '127.0.0.1' );
+define('DB_HOST', '172.17.0.1:3318');
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8' );
@@ -84,6 +84,11 @@ $table_prefix = 'buf_';
  */
 define( 'WP_DEBUG', false );
 
+if (!defined('WP_SITEURL')) {
+    define('WP_SITEURL', 'http://cmg.4aoc.ru');
+}
+
+define('WP_HOME', 'http://cmg.4aoc.ru/');
 
 /* Add any custom values between this line and the "stop editing" line. */
 
